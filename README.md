@@ -1,6 +1,6 @@
-# ciclocare
+# CicloCare
 
-A new Flutter project.
+Um projeto de UI/UX acessível e simples feito em flutter, focado no público idoso que precisa de apoio para lembrar de seus medicamentos diariamente.
 
 ## Getting Started
 
