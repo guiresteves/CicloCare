@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "551388171788",
+    "project_id": "ciclocare-7cd54",
+    "storage_bucket": "ciclocare-7cd54.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:551388171788:android:e9c1cfb9ffcb62165be829",
+        "android_client_info": {
+          "package_name": "com.example.ciclocare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMkasWz56H2qqR_DBy03zehz4HT4caJPI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
