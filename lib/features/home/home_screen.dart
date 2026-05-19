@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'medication_modal.dart';
-
+import '../notifications/notifications_screen.dart';
 // ════════════════════════════════════════════════════════════
 //  HOME SCREEN — Titular
 //  Arquivo: lib/features/home/home_screen.dart
@@ -66,8 +66,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // ── CORES ────────────────────────────────────────────────
-  static const Color _purple = Color(0xFF7C5CBF);
+  
   static const Color _teal   = Color(0xFF3DB89E);
   static const Color _white  = Color(0xFFFFFFFF);
   static const Color _grey   = Color(0xFF6B7280);
@@ -172,8 +171,15 @@ class _HomeScreenState extends State<HomeScreen> {
               // Ícones de notificação e configurações
               IconButton(
                 icon: const Icon(Icons.notifications_outlined, color: _white),
-                onPressed: () {},
-              ),
+                onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const NotificationsScreen(),
+      ),
+    );
+  },
+),
               IconButton(
                 icon: const Icon(Icons.settings_outlined, color: _white),
                 onPressed: () {},
@@ -430,9 +436,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [_teal, _purple],
-            ),
+            color: _teal,
             borderRadius: BorderRadius.circular(30),
           ),
           child: const Icon(Icons.home_rounded, color: _white, size: 28),

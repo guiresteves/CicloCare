@@ -22,7 +22,7 @@ class CicloCareApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
-      initialRoute: '/onboarding',
+      initialRoute: '/home',
       routes: {
         '/onboarding': (context) => const OnboardingScreen(),
         '/home':       (context) => HomeScreen(), 

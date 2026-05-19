@@ -31,9 +31,8 @@ class MedicationModal extends StatefulWidget {
 
 class _MedicationModalState extends State<MedicationModal> {
   // ── CORES ────────────────────────────────────────────────
-  static const Color _teal   = Color(0xFF3DB89E);
+  static const Color _teal   = Color(0xFF2CA880);
   static const Color _white  = Color(0xFFFFFFFF);
-  static const Color _grey   = Color(0xFF6B7280);
   static const Color _red    = Color(0xFFEF4444);
   static const Color _bgGrey = Color(0xFFF3F4F6);
 
@@ -200,7 +199,7 @@ class _MedicationModalState extends State<MedicationModal> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFDFF5EE),
+        color: const Color(0xFFCAFFD5),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -294,14 +293,6 @@ class _MedicationModalState extends State<MedicationModal> {
           onChanged: (val) => setState(() => _doseTaken = val ?? false),
         ),
         const Text('Dose Tomada', style: TextStyle(fontSize: 14)),
-
-        const Spacer(),
-
-        // Ícone de lixeira — abre confirmação de exclusão
-        IconButton(
-          icon: const Icon(Icons.delete_outline, color: _red),
-          onPressed: () => setState(() => _showDeleteConfirm = true),
-        ),
       ],
     );
   }
