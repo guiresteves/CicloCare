@@ -5,6 +5,8 @@ import 'features/auth/screens/onboarding_screen.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/home/screens/home_screen.dart';
+import 'features/auth/screens/terms_screen.dart';
+import 'features/auth/screens/privacy_screen.dart';
 
 void main() {
   runApp(const CicloCareApp());
@@ -24,6 +26,8 @@ class CicloCareApp extends StatelessWidget {
         AppRoutes.onboarding: (_) => const OnboardingScreen(),
         AppRoutes.login: (_) => const LoginScreen(),
         AppRoutes.register: (_) => const RegisterScreen(),
+        AppRoutes.terms: (_) => const TermsScreen(),
+        AppRoutes.privacy: (_) => const PrivacyScreen(),
         AppRoutes.home: (_) => const HomeScreen(),
       },
     );
