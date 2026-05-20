@@ -124,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: GestureDetector(
-                    onTap: () {},
+                    onTap: () => Navigator.pushNamed(context, AppRoutes.forgotPassword),
                     child: const Padding(
                       padding: EdgeInsets.only(top: 12),
                       child: Text(
