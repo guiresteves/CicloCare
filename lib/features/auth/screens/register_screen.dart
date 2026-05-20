@@ -245,7 +245,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   const TextSpan(text: 'Li e concordo com os e '),
                                   WidgetSpan(
                                     child: GestureDetector(
-                                      onTap: () {},
+                                      onTap: () => Navigator.pushNamed(context, AppRoutes.terms),
                                       child: const Text(
                                         'Termos e Condições',
                                         style: TextStyle(
@@ -259,7 +259,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   const TextSpan(text: ' e com a '),
                                   WidgetSpan(
                                     child: GestureDetector(
-                                      onTap: () {},
+                                      onTap: () => Navigator.pushNamed(context, AppRoutes.privacy),
                                       child: const Text(
                                         'Política de Privacidade',
                                         style: TextStyle(
