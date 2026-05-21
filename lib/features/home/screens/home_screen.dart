@@ -4,7 +4,7 @@ import '../mock/mock_medication_service.dart';
 import '../../auth/mock/mock_auth_service.dart';
 import 'medication_modal.dart';
 import 'under_construction_screen.dart';
-
+import '../../../core/constants/app_routes.dart';
 // ════════════════════════════════════════════════════════════
 //  HOME SCREEN — CicloCare (acessibilidade terceira idade)
 //  Arquivo: lib/features/home/screens/home_screen.dart
@@ -65,8 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final meds = MockMedicationService.instance.getAll();
     _items = meds.asMap().entries.map((e) {
       MedStatus status;
-      if (e.key == 0)      status = MedStatus.overdue;
-      else if (e.key == 1) status = MedStatus.done;
+      if (e.key == 0) {
+        status = MedStatus.overdue;
+      } else if (e.key == 1) status = MedStatus.done;
       else                 status = MedStatus.pending;
       return MedicationItem(med: e.value, status: status);
     }).toList();
@@ -160,7 +161,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   // Botões com área mínima de 56px
-                  _iconBtn(Icons.notifications_outlined, 'Notificações'),
+                  GestureDetector(
+                    onTap: () => Navigator.pushNamed(context, AppRoutes.notifications),
+                    child: _iconBtn(Icons.notifications_outlined, 'Notificações'),
+                  ),
                   const SizedBox(width: 10),
                   _iconBtn(Icons.settings_outlined, 'Configurações'),
                 ],
@@ -174,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: _days.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                  separatorBuilder: (_, _) => const SizedBox(width: 10),
                   itemBuilder: (_, index) {
                     final isSelected = index == _selectedDayIndex;
                     return GestureDetector(
@@ -317,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: _filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (_, i) {
           final selected = i == _filterIndex;
           return GestureDetector(
