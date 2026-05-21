@@ -3,6 +3,7 @@ import '../models/medication.dart';
 import '../mock/mock_medication_service.dart';
 import '../../auth/mock/mock_auth_service.dart';
 import 'medication_modal.dart';
+import 'under_construction_screen.dart';
 
 // ════════════════════════════════════════════════════════════
 //  HOME SCREEN — CicloCare (acessibilidade terceira idade)
@@ -865,15 +866,15 @@ class _HomeScreenState extends State<HomeScreen> {
   // ════════════════════════════════════════════════════════
   Widget _buildBottomBar() {
     final items = [
-      {'icon': Icons.medication_outlined,     'label': 'Remédios'},
-      {'icon': Icons.bolt_outlined,           'label': 'Atividade'},
-      {'icon': Icons.home_rounded,            'label': 'Início'},
-      {'icon': Icons.calendar_month_outlined, 'label': 'Agenda'},
-      {'icon': Icons.person_outline_rounded,  'label': 'Perfil'},
+      {'icon': Icons.medication_outlined,     'label': 'Remédios',  'title': 'Remédios',  'iconData': Icons.medication_outlined},
+      {'icon': Icons.bolt_outlined,           'label': 'Atividade', 'title': 'Atividade', 'iconData': Icons.bolt_outlined},
+      {'icon': Icons.home_rounded,            'label': 'Início',    'title': '',           'iconData': Icons.home_rounded},
+      {'icon': Icons.calendar_month_outlined, 'label': 'Agenda',    'title': 'Agenda',    'iconData': Icons.calendar_month_outlined},
+      {'icon': Icons.person_outline_rounded,  'label': 'Perfil',    'title': 'Perfil',    'iconData': Icons.person_outline_rounded},
     ];
 
     return Container(
-      height: 80, // mais alta para idosos
+      height: 80,
       decoration: BoxDecoration(
         color: _white,
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, -3))],
@@ -881,20 +882,33 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: items.asMap().entries.map((e) {
-          final isHome = e.key == 2;
-          final icon   = e.value['icon'] as IconData;
-          final label  = e.value['label'] as String;
+          final isHome  = e.key == 2;
+          final icon    = e.value['icon'] as IconData;
+          final label   = e.value['label'] as String;
+          final title   = e.value['title'] as String;
+          final iconData= e.value['iconData'] as IconData;
+
           return GestureDetector(
-            onTap: () {},
+            onTap: isHome
+                ? null // já está na home
+                : () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => UnderConstructionScreen(
+                        title: title,
+                        icon: iconData,
+                      ),
+                    ),
+                  ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: isHome ? _green : _grey, size: 30), // ícone grande
+                Icon(icon, color: isHome ? _green : _grey, size: 30),
                 const SizedBox(height: 4),
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 12, // label embaixo do ícone
+                    fontSize: 12,
                     color: isHome ? _green : _grey,
                     fontWeight: isHome ? FontWeight.w700 : FontWeight.w500,
                   ),
