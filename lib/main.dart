@@ -8,6 +8,7 @@ import 'features/home/screens/home_screen.dart';
 import 'features/auth/screens/terms_screen.dart';
 import 'features/auth/screens/privacy_screen.dart';
 import 'features/auth/screens/forgot_password_screen.dart';
+import 'features/notifications/screens/notifications_screen.dart';
 
 void main() {
   runApp(const CicloCareApp());
@@ -31,6 +32,7 @@ class CicloCareApp extends StatelessWidget {
         AppRoutes.terms: (_) => const TermsScreen(),
         AppRoutes.privacy: (_) => const PrivacyScreen(),
         AppRoutes.home: (_) => const HomeScreen(),
+        AppRoutes.notifications: (_) => const NotificationsScreen(),
       },
     );
   }
