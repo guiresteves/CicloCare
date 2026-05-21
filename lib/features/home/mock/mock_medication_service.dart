@@ -1,64 +1,33 @@
 import '../models/medication.dart';
 
-// ════════════════════════════════════════════════════════════
-//  MOCK MEDICATION SERVICE
-//  Arquivo: lib/features/home/mock/mock_medication_service.dart
-//
-//  Segue o mesmo padrão do MockAuthService do módulo de auth.
-//  Centraliza os dados e operações de medicamentos.
-// ════════════════════════════════════════════════════════════
-
 class MockMedicationService {
   MockMedicationService._();
   static final MockMedicationService instance = MockMedicationService._();
 
-  // Dados mockados iniciais — privados, só acessados pelos métodos
   final List<Medication> _medications = [
     Medication(
-      id: '1',
-      name: 'Dipirona 500 mg',
-      dosage: '1 comprimido',
-      time: '08:00',
-      frequency: '2X DIA',
-      type: 'CP',
+      id: '1', name: 'Dipirona 500 mg', dosage: '1 comprimido(s)',
+      time: '08:00', frequency: '2X DIA', type: 'CP',
+      startDate: DateTime(2025, 4, 20), endDate: DateTime(2025, 5, 20),
     ),
     Medication(
-      id: '2',
-      name: 'Dipirona 500 mg',
-      dosage: '1 comprimido',
-      time: '16:00',
-      frequency: '2X DIA',
-      type: 'CP',
+      id: '2', name: 'Dipirona 500 mg', dosage: '1 comprimido(s)',
+      time: '16:00', frequency: '2X DIA', type: 'CP',
+      startDate: DateTime(2025, 4, 1), endDate: DateTime(2025, 4, 30),
     ),
     Medication(
-      id: '3',
-      name: 'Dipirona 500 mg',
-      dosage: '1 comprimido',
-      time: '20:00',
-      frequency: '2X DIA',
-      type: 'CP',
+      id: '3', name: 'Dipirona 500 mg', dosage: '1 comprimido(s)',
+      time: '20:00', frequency: '1X AO DIA', type: 'CP',
+      startDate: DateTime(2025, 4, 24), endDate: DateTime(2025, 5, 24),
     ),
   ];
 
-  /// Retorna uma cópia da lista para evitar modificação externa direta
   List<Medication> getAll() => List.from(_medications);
-
-  /// Adiciona um novo medicamento
-  void add(Medication medication) {
-    _medications.add(medication);
-  }
-
-  /// Atualiza um medicamento existente pelo id
+  void add(Medication m) => _medications.add(m);
   void update(Medication updated) {
-    final index = _medications.indexWhere((m) => m.id == updated.id);
-    if (index != -1) _medications[index] = updated;
+    final i = _medications.indexWhere((m) => m.id == updated.id);
+    if (i != -1) _medications[i] = updated;
   }
-
-  /// Remove um medicamento pelo id
-  void delete(String id) {
-    _medications.removeWhere((m) => m.id == id);
-  }
-
-  /// Gera um id único baseado no timestamp
+  void delete(String id) => _medications.removeWhere((m) => m.id == id);
   String generateId() => DateTime.now().millisecondsSinceEpoch.toString();
 }
