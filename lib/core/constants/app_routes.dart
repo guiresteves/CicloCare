@@ -1,12 +1,7 @@
-// ════════════════════════════════════════════════════════════
-//  APP ROUTES — CicloCare
-//  Arquivo: lib/core/constants/app_routes.dart
-// ════════════════════════════════════════════════════════════
-
 class AppRoutes {
   AppRoutes._();
 
-  // ── Auth ─────────────────────────────────────────────────
+  // Auth 
   static const String onboarding    = '/';
   static const String login         = '/login';
   static const String register      = '/register';
@@ -14,20 +9,20 @@ class AppRoutes {
   static const String terms         = '/terms';
   static const String privacy       = '/privacy';
 
-  // ── Main (com bottom nav) ────────────────────────────────
+  // Main (com bottom nav)
   static const String main          = '/main';
 
-  // ── Medicamentos ─────────────────────────────────────────
+  // Medicamentos
   static const String medications   = '/medications';
   static const String medicationAdd = '/medications/add';
 
-  // ── Exames ───────────────────────────────────────────────
+  // Exames
   static const String exams         = '/exams';
   static const String examAdd       = '/exams/add';
 
-  // ── Histórico ────────────────────────────────────────────
+  // Histórico
   static const String history       = '/history';
 
-  // ── Perfil ───────────────────────────────────────────────
+  // Perfil
   static const String profile       = '/profile';
 }
