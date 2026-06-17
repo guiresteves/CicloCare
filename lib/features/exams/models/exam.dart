@@ -1,8 +1,3 @@
-// ════════════════════════════════════════════════════════════
-//  MODELO — Exam
-//  Arquivo: lib/features/exams/models/exam.dart
-// ════════════════════════════════════════════════════════════
-
 enum ExamStatus { scheduled, completed, cancelled }
 enum ExamType   { laboratorial, imaging, clinical, consultation }
 
@@ -16,7 +11,6 @@ class Exam {
   String location;
   String doctor;
   String observations;
-  String? resultPath; // caminho do arquivo de resultado (PDF/imagem)
   DateTime createdAt;
 
   Exam({
@@ -29,13 +23,15 @@ class Exam {
     this.location     = '',
     this.doctor       = '',
     this.observations = '',
-    this.resultPath,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
-  // ── Helpers ──────────────────────────────────────────────
-
-  bool get isPast => scheduledDate.isBefore(DateTime.now());
+  bool get isPast {
+    final today = DateTime.now();
+    final d = DateTime(scheduledDate.year, scheduledDate.month, scheduledDate.day);
+    final t = DateTime(today.year, today.month, today.day);
+    return d.isBefore(t);
+  }
 
   bool get isToday {
     final now = DateTime.now();
@@ -44,11 +40,10 @@ class Exam {
            scheduledDate.day   == now.day;
   }
 
-  String get formattedDate {
-    return '${scheduledDate.day.toString().padLeft(2,'0')}/'
-        '${scheduledDate.month.toString().padLeft(2,'0')}/'
-        '${scheduledDate.year}';
-  }
+  String get formattedDate =>
+      '${scheduledDate.day.toString().padLeft(2,'0')}/'
+      '${scheduledDate.month.toString().padLeft(2,'0')}/'
+      '${scheduledDate.year}';
 
   String get typeLabel {
     switch (type) {
@@ -66,6 +61,4 @@ class Exam {
       case ExamStatus.cancelled:   return 'Cancelado';
     }
   }
-
-  bool get hasResult => resultPath != null && resultPath!.isNotEmpty;
 }
