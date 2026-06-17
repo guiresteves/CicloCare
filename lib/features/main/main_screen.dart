@@ -7,10 +7,6 @@ import '../exams/screens/exams_screen.dart';
 import '../history/screens/history_screen.dart';
 import '../profile/screens/profile_screen.dart';
 
-// ════════════════════════════════════════════════════════════
-//  MAIN SCREEN — Shell com Bottom Navigation Bar
-//  Arquivo: lib/features/main/main_screen.dart
-// ════════════════════════════════════════════════════════════
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,12 +14,9 @@ class MainScreen extends StatefulWidget {
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
-
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  // Não usar const aqui — permite que erros de compilação
-  // sejam reportados individualmente por tela
   late final List<Widget> _screens;
 
   @override
