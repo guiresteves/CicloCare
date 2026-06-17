@@ -46,7 +46,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── Header ───────────────────────────────────────────────
+            // Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Stack(
@@ -83,7 +83,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ),
             ),
 
-            // ── Conteúdo ─────────────────────────────────────────────
+            // Conteúdo
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -193,7 +193,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
-  // ── Tela de sucesso após envio ────────────────────────────────────────────
+  //  Tela de sucesso após envio
   Widget _buildSuccess() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
