@@ -3,11 +3,6 @@ import 'package:flutter/services.dart';
 import 'app_colors.dart';
 import 'app_text_styles.dart';
 
-// ════════════════════════════════════════════════════════════
-//  APP THEME — CicloCare
-//  Arquivo: lib/core/theme/app_theme.dart
-// ════════════════════════════════════════════════════════════
-
 class AppTheme {
   AppTheme._();
 
@@ -36,7 +31,7 @@ class AppTheme {
         ),
       ),
 
-      // ── Botão primário ────────────────────────────────────
+      // Botão primário
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -49,7 +44,7 @@ class AppTheme {
         ),
       ),
 
-      // ── Botão outline ─────────────────────────────────────
+      // Botão outline
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
@@ -60,7 +55,7 @@ class AppTheme {
         ),
       ),
 
-      // ── Input ─────────────────────────────────────────────
+      // Input
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.inputBg,
@@ -90,7 +85,7 @@ class AppTheme {
         errorStyle: AppTextStyles.inputError,
       ),
 
-      // ── Card ──────────────────────────────────────────────
+      // Card
       cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 0,
@@ -101,7 +96,7 @@ class AppTheme {
         margin: EdgeInsets.zero,
       ),
 
-      // ── Bottom Nav ────────────────────────────────────────
+      // Bottom Nav
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.white,
         selectedItemColor: AppColors.primary,
@@ -112,7 +107,7 @@ class AppTheme {
         elevation: 0,
       ),
 
-      // ── Chip ──────────────────────────────────────────────
+      // Chip
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.primaryLight,
         labelStyle: AppTextStyles.labelMedium.copyWith(color: AppColors.primary),
@@ -120,14 +115,14 @@ class AppTheme {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       ),
 
-      // ── Divider ───────────────────────────────────────────
+      // Divider
       dividerTheme: const DividerThemeData(
         color: AppColors.divider,
         thickness: 1,
         space: 0,
       ),
 
-      // ── FloatingActionButton ──────────────────────────────
+      // FloatingActionButton
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
