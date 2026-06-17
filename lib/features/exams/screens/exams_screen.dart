@@ -5,6 +5,18 @@ import '../../../core/theme/app_text_styles.dart';
 import '../models/exam.dart';
 import '../mock/mock_exam_service.dart';
 
+// ════════════════════════════════════════════════════════════
+//  EXAMS SCREEN — CicloCare
+//  Arquivo: lib/features/exams/screens/exams_screen.dart
+//
+//  Alteração 4:
+//  • Exibe SOMENTE exames agendados (não concluídos)
+//  • Sem medicamentos
+//  • Timeline moderna com agrupamento por data
+//  • Cadastro com campos: nome, tipo, data, horário,
+//    local, médico, observações
+//  • Cards com destaque em data/horário
+// ════════════════════════════════════════════════════════════
 
 class ExamsScreen extends StatefulWidget {
   const ExamsScreen({super.key});
@@ -89,7 +101,9 @@ class _ExamsScreenState extends State<ExamsScreen> {
     );
   }
 
+  // ════════════════════════════════════════════════════════
   //  TIMELINE
+  // ════════════════════════════════════════════════════════
   Widget _buildTimeline() {
     // Agrupa por data
     final grouped = <String, List<Exam>>{};
@@ -111,11 +125,11 @@ class _ExamsScreenState extends State<ExamsScreen> {
           children: [
             if (i > 0) const SizedBox(height: 24),
 
-            // Cabeçalho de data
+            // ── Cabeçalho de data ────────────────────────
             _DateHeader(exam: exam0),
             const SizedBox(height: 12),
 
-            // Cards do dia
+            // ── Cards do dia ─────────────────────────────
             ...items.asMap().entries.map((e) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
@@ -197,6 +211,9 @@ class _ExamsScreenState extends State<ExamsScreen> {
     );
   }
 
+  // ════════════════════════════════════════════════════════
+  //  DETALHE DO EXAME
+  // ════════════════════════════════════════════════════════
   void _showDetail(Exam exam) {
     showModalBottomSheet(
       context: context,
@@ -214,6 +231,9 @@ class _ExamsScreenState extends State<ExamsScreen> {
     );
   }
 
+  // ════════════════════════════════════════════════════════
+  //  ADICIONAR EXAME
+  // ════════════════════════════════════════════════════════
   void _showAddSheet() {
     showModalBottomSheet(
       context: context,
@@ -226,7 +246,7 @@ class _ExamsScreenState extends State<ExamsScreen> {
   }
 }
 
-// Date Header
+// ── Date Header ───────────────────────────────────────────────────────────────
 class _DateHeader extends StatelessWidget {
   final Exam exam;
   const _DateHeader({required this.exam});
@@ -264,7 +284,7 @@ class _DateHeader extends StatelessWidget {
   }
 }
 
-// Exam Card
+// ── Exam Card ─────────────────────────────────────────────────────────────────
 class _ExamCard extends StatelessWidget {
   final Exam exam;
   final VoidCallback onTap;
@@ -383,7 +403,7 @@ class _ExamCard extends StatelessWidget {
   }
 }
 
-// Exam Detail Sheet
+// ── Exam Detail Sheet ─────────────────────────────────────────────────────────
 class _ExamDetailSheet extends StatelessWidget {
   final Exam exam;
   final VoidCallback onMarkDone;
@@ -499,7 +519,7 @@ class _ExamDetailSheet extends StatelessWidget {
   }
 }
 
-// Add Exam Sheet
+// ── Add Exam Sheet ────────────────────────────────────────────────────────────
 class _AddExamSheet extends StatefulWidget {
   final VoidCallback onSaved;
   const _AddExamSheet({required this.onSaved});

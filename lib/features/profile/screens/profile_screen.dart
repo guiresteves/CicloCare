@@ -3,8 +3,19 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/constants/app_routes.dart';
 import '../../auth/mock/mock_auth_service.dart';
-import '../../auth/screens/change_password_screen.dart';
+import 'change_password_screen.dart';
 
+// ════════════════════════════════════════════════════════════
+//  PROFILE SCREEN — CicloCare
+//  Arquivo: lib/features/profile/screens/profile_screen.dart
+//
+//  Alteração 6:
+//  • Edição de dados pessoais (nome, email, telefone,
+//    data de nascimento, foto mockada)
+//  • Botão "Alterar senha" navega para ChangePasswordScreen
+//  • Notificações com switches
+//  • Logout com confirmação
+// ════════════════════════════════════════════════════════════
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -83,7 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          // Header com avatar
+          // ── Header com avatar ────────────────────────────
           SliverAppBar(
             expandedHeight: 230,
             pinned: true,
@@ -165,14 +176,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
 
-          // Conteúdo
+          // ── Conteúdo ─────────────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
 
-                  // Dados pessoais
+                  // ── Dados pessoais ─────────────────────────
                   _SectionCard(
                     icon: Icons.person_outline_rounded,
                     title: 'Dados Pessoais',
@@ -190,7 +201,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Notificações
+                  // ── Notificações ───────────────────────────
                   _SectionCard(
                     icon: Icons.notifications_outlined,
                     title: 'Notificações',
@@ -215,7 +226,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Segurança
+                  // ── Segurança ──────────────────────────────
                   _SectionCard(
                     icon: Icons.shield_outlined,
                     title: 'Segurança',
@@ -267,7 +278,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Logout
+                  // ── Logout ─────────────────────────────────
                   SizedBox(
                     width: double.infinity, height: 56,
                     child: OutlinedButton.icon(
@@ -304,6 +315,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
+// ════════════════════════════════════════════════════════════
+//  EDIT PROFILE SHEET
+// ════════════════════════════════════════════════════════════
 class _EditProfileSheet extends StatefulWidget {
   final Map<String, String> user;
   final VoidCallback onSaved;
@@ -472,6 +486,10 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
   }
 }
 
+// ════════════════════════════════════════════════════════════
+//  WIDGETS AUXILIARES
+// ════════════════════════════════════════════════════════════
+
 class _SectionCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -599,3 +617,4 @@ class _ActionRow extends StatelessWidget {
     if (!isLast) const Divider(height: 1, indent: 18, endIndent: 18),
   ]);
 }
+

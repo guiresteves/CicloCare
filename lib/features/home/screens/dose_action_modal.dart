@@ -41,7 +41,6 @@ class DoseActionModal extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Handle
           Center(
             child: Container(
               width: 44, height: 5,
@@ -52,11 +51,9 @@ class DoseActionModal extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // Mini card do medicamento
           _MiniMedCard(med: med, time: time, status: status),
           const SizedBox(height: 20),
 
-          // Alerta de atraso
           if (isOverdue) ...[
             Container(
               width: double.infinity,
@@ -76,12 +73,12 @@ class DoseActionModal extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Medicamento atrasado!',
+                        Text('Atrasado!',
                           style: AppTextStyles.labelLarge.copyWith(
                             color: AppColors.overdue)),
                         const SizedBox(height: 4),
                         Text(
-                          'Deveria ter sido tomado às $time.\nDecida o que fazer abaixo.',
+                          'Deveria ter sido feito às $time.\nDecida o que fazer abaixo.',
                           style: AppTextStyles.bodySmall.copyWith(
                             color: AppColors.overdue)),
                       ],
@@ -93,26 +90,24 @@ class DoseActionModal extends StatelessWidget {
             const SizedBox(height: 16),
           ],
 
-          // Pergunta
           Text(
             isDone
-                ? 'Deseja desmarcar este medicamento?'
-                : 'O que deseja fazer com este medicamento?',
+                ? 'Deseja desmarcar este item?'
+                : 'O que deseja fazer com este item?',
             style: AppTextStyles.headlineSmall,
           ),
           const SizedBox(height: 6),
           Text(
             isDone
                 ? 'Ele voltará para a lista de pendentes.'
-                : 'Confirme apenas após tomar a dose correta.',
+                : 'Confirme apenas após concluir.',
             style: AppTextStyles.bodyMedium,
           ),
           const SizedBox(height: 24),
 
-          // Botões
           if (isDone) ...[
             _ActionBtn(
-              label: 'Desmarcar dose',
+              label: 'Desmarcar',
               color: AppColors.done,
               textColor: AppColors.white,
               onTap: () {
@@ -122,7 +117,7 @@ class DoseActionModal extends StatelessWidget {
             ),
           ] else ...[
             _ActionBtn(
-              label: '✓  Sim, já tomei',
+              label: '✓  Concluir',
               color: AppColors.primary,
               textColor: AppColors.white,
               onTap: () {
@@ -132,7 +127,7 @@ class DoseActionModal extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             _ActionBtn(
-              label: 'Pular esta dose',
+              label: 'Pular',
               color: AppColors.warning,
               textColor: AppColors.white,
               onTap: () {
@@ -161,6 +156,14 @@ class _MiniMedCard extends StatelessWidget {
   final MedicationStatus status;
   const _MiniMedCard({required this.med, required this.time, required this.status});
 
+  IconData get _icon {
+    switch (med.category) {
+      case MedicationCategory.remedio:  return Icons.medication_rounded;
+      case MedicationCategory.exame:    return Icons.biotech_rounded;
+      case MedicationCategory.consulta: return Icons.medical_services_rounded;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDone = status == MedicationStatus.taken;
@@ -182,8 +185,7 @@ class _MiniMedCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.primaryLight,
               borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.medication_rounded,
-              color: AppColors.primary, size: 26),
+            child: Icon(_icon, color: AppColors.primary, size: 26),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -201,9 +203,7 @@ class _MiniMedCard extends StatelessWidget {
                 Row(children: [
                   _chip(Icons.access_time_rounded, time, AppColors.primary),
                   const SizedBox(width: 6),
-                  _chip(null, med.frequency, AppColors.primary),
-                  const SizedBox(width: 6),
-                  _chip(null, med.type, AppColors.primary),
+                  _chip(null, med.categoryLabel, AppColors.primary),
                 ]),
               ],
             ),

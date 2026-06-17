@@ -1,3 +1,8 @@
+// ════════════════════════════════════════════════════════════
+//  MOCK AUTH SERVICE
+//  Arquivo: lib/features/auth/mock/mock_auth_service.dart
+// ════════════════════════════════════════════════════════════
+
 class MockAuthService {
   MockAuthService._();
   static final MockAuthService instance = MockAuthService._();

@@ -80,6 +80,15 @@ class MockMedicationService {
   List<Medication> getByCategory(MedicationCategory category) =>
       _medications.where((m) => m.category == category).toList();
 
+  /// Retorna apenas medicamentos (Alteração 3 — tela de Remédios)
+  List<Medication> getActiveMedications() {
+    final now = DateTime.now();
+    return _medications.where((m) =>
+      m.category == MedicationCategory.remedio &&
+      (m.endDate == null || !m.endDate!.isBefore(DateTime(now.year, now.month, now.day)))
+    ).toList();
+  }
+
   Medication? getById(String id) {
     try {
       return _medications.firstWhere((m) => m.id == id);

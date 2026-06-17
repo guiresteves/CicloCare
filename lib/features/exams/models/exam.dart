@@ -1,3 +1,8 @@
+// ════════════════════════════════════════════════════════════
+//  MODELO — Exam
+//  Arquivo: lib/features/exams/models/exam.dart
+// ════════════════════════════════════════════════════════════
+
 enum ExamStatus { scheduled, completed, cancelled }
 enum ExamType   { laboratorial, imaging, clinical, consultation }
 

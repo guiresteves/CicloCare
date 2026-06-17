@@ -11,6 +11,13 @@ import 'dose_entry.dart';
 // ════════════════════════════════════════════════════════════
 //  HOME SCREEN — CicloCare
 //  Arquivo: lib/features/home/screens/home_screen.dart
+//
+//  Alteração 2:
+//  - Removido subtítulo fixo "X doses" (não fazia sentido
+//    para exames/consultas).
+//  - Substituído por "X atividade(s)" / "X item(ns) programado(s)".
+//  - Cards usam ícones diferentes por categoria
+//    (ver medication_dose_card.dart).
 // ════════════════════════════════════════════════════════════
 
 class HomeScreen extends StatefulWidget {
@@ -32,7 +39,6 @@ class _HomeScreenState extends State<HomeScreen> {
   late List<DateTime> _calendarDays;
   int _selectedDayIndex = 0;
 
-  // Cada dose é uma combinação de medicamento + horário
   late List<DoseEntry> _doses;
 
   @override
@@ -53,7 +59,6 @@ class _HomeScreenState extends State<HomeScreen> {
         _doses.add(DoseEntry(med: med, time: time));
       }
     }
-    // Ordena por horário
     _doses.sort((a, b) => a.time.compareTo(b.time));
   }
 
@@ -68,6 +73,21 @@ class _HomeScreenState extends State<HomeScreen> {
   // ── Filtra doses por período ─────────────────────────────
   List<DoseEntry> _dosesForPeriod(String period) =>
       _doses.where((d) => Medication.periodOf(d.time) == period).toList();
+
+  /// Texto do subtítulo da seção, considerando se há mistura
+  /// de medicamentos e exames/consultas no período
+  String _periodSubtitle(List<DoseEntry> doses) {
+    final hasOnlyMeds = doses.every(
+        (d) => d.med.category == MedicationCategory.remedio);
+    final count = doses.length;
+
+    if (hasOnlyMeds) {
+      // Todos são medicamentos → pode falar "doses"
+      return count == 1 ? '1 dose programada' : '$count doses programadas';
+    }
+    // Mistura de medicamentos, exames e/ou consultas
+    return count == 1 ? '1 item programado' : '$count itens programados';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +139,6 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
           child: Column(
             children: [
-              // ── Perfil ──────────────────────────────────
               Row(
                 children: [
                   CircleAvatar(
@@ -152,7 +171,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 22),
 
-              // ── Calendário ──────────────────────────────
               SizedBox(
                 height: 86,
                 child: ListView.separated(
@@ -164,7 +182,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     final date = _calendarDays[i];
                     final isToday = i == 0;
 
-                    // Conta doses do dia para o indicador
                     final meds = MockMedicationService.instance.getActiveOn(date);
                     final hasDoses = meds.isNotEmpty;
 
@@ -265,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Medicamentos do Dia',
+              Text('Atividades do Dia',
                 style: AppTextStyles.headlineSmall),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -323,14 +340,16 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(period,
                 style: AppTextStyles.sectionTitle.copyWith(color: color)),
               const Spacer(),
-              Text('${doses.length} ${doses.length == 1 ? 'dose' : 'doses'}',
+              // Subtítulo dinâmico — sem mencionar "dose" para
+              // grupos que misturam exames/consultas
+              Text(_periodSubtitle(doses),
                 style: AppTextStyles.labelSmall.copyWith(color: color)),
             ],
           ),
         ),
         const SizedBox(height: 10),
 
-        // Cards de dose
+        // Cards
         ...doses.map((d) => Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: MedicationDoseCard(
@@ -361,7 +380,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: AppColors.primary, size: 46),
             ),
             const SizedBox(height: 20),
-            Text('Nenhum medicamento\npara este dia',
+            Text('Nenhuma atividade\npara este dia',
               textAlign: TextAlign.center,
               style: AppTextStyles.headlineSmall),
             const SizedBox(height: 8),
@@ -392,5 +411,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-// ── Dose Entry: medicamento + horário ────────────────────────────────────────

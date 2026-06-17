@@ -1,5 +1,9 @@
 import '../models/history_item.dart';
 
+// ════════════════════════════════════════════════════════════
+//  MOCK HISTORY SERVICE
+//  Arquivo: lib/features/history/mock/mock_history_service.dart
+// ════════════════════════════════════════════════════════════
 
 class MockHistoryService {
   MockHistoryService._();

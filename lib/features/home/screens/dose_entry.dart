@@ -1,7 +1,7 @@
 import '../models/medication.dart';
 
 // ════════════════════════════════════════════════════════════
-//  DOSE ENTRY — Combinação de medicamento + horário
+//  DOSE ENTRY — Combinação de medicamento/exame + horário
 //  Arquivo: lib/features/home/screens/dose_entry.dart
 // ════════════════════════════════════════════════════════════
 

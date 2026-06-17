@@ -5,30 +5,22 @@
 
 enum MedicationCategory { remedio, exame, consulta }
 
-enum MedicationStatus {
-  pending,  // pendente (ainda não chegou o horário ou não tomou)
-  taken,    // tomado (concluído pelo usuário)
-  overdue,  // atrasado (passou do horário sem tomar)
-  skipped,  // pulado pelo usuário
-}
+enum MedicationStatus { pending, taken, overdue, skipped }
 
 class Medication {
   final String id;
   String name;
   String dosage;
-  String frequency;   // ex: "2X DIA"
-  int timesPerDay;    // número de vezes por dia (gera cards automáticos)
-  List<String> times; // horários gerados: ["08:00", "14:00", "20:00"]
-  String type;        // CP, ML, GTS...
+  String frequency;
+  int timesPerDay;
+  List<String> times;
+  String type;
   MedicationCategory category;
   String observations;
 
-  // Período
   DateTime? startDate;
   DateTime? endDate;
 
-  // Status por horário: key = "YYYY-MM-DD_HH:MM", value = MedicationStatus
-  // Permite persistir o status de cada dose individualmente
   Map<String, MedicationStatus> statusMap;
 
   Medication({
@@ -46,14 +38,10 @@ class Medication {
     Map<String, MedicationStatus>? statusMap,
   }) : statusMap = statusMap ?? {};
 
-  // ── Helpers ──────────────────────────────────────────────
-
-  /// Retorna o status de uma dose específica (dia + horário)
   MedicationStatus statusFor(DateTime day, String time) {
     final key = _key(day, time);
     if (statusMap.containsKey(key)) return statusMap[key]!;
 
-    // Calcula automaticamente se está atrasado
     final now = DateTime.now();
     final parts = time.split(':');
     final doseTime = DateTime(day.year, day.month, day.day,
@@ -65,7 +53,6 @@ class Medication {
     return MedicationStatus.pending;
   }
 
-  /// Atualiza o status de uma dose
   void setStatus(DateTime day, String time, MedicationStatus status) {
     statusMap[_key(day, time)] = status;
   }
@@ -73,7 +60,6 @@ class Medication {
   String _key(DateTime day, String time) =>
       '${day.year}-${day.month.toString().padLeft(2,'0')}-${day.day.toString().padLeft(2,'0')}_$time';
 
-  /// Verifica se o medicamento deve aparecer em um dia específico
   bool isActiveOn(DateTime day) {
     final d = DateTime(day.year, day.month, day.day);
     if (startDate == null || endDate == null) return true;
@@ -82,7 +68,6 @@ class Medication {
     return !d.isBefore(s) && !d.isAfter(e);
   }
 
-  /// Formato legível do período
   String get periodLabel {
     if (startDate == null || endDate == null) return 'Sem período definido';
     return '${_fmt(startDate!)} até ${_fmt(endDate!)}';
@@ -91,7 +76,6 @@ class Medication {
   String _fmt(DateTime d) =>
       '${d.day.toString().padLeft(2,'0')}/${d.month.toString().padLeft(2,'0')}/${d.year}';
 
-  /// Dias restantes do tratamento
   int get daysRemaining {
     if (endDate == null) return -1;
     return endDate!.difference(DateTime.now()).inDays;
@@ -105,7 +89,6 @@ class Medication {
     return 'Noite';
   }
 
-  /// Gera horários distribuídos automaticamente conforme timesPerDay
   static List<String> generateTimes(int timesPerDay) {
     switch (timesPerDay) {
       case 1:  return ['08:00'];
@@ -115,5 +98,23 @@ class Medication {
       case 6:  return ['06:00', '10:00', '14:00', '18:00', '22:00', '02:00'];
       default: return ['08:00'];
     }
+  }
+
+  /// Texto do badge de tipo de item (Medicamento / Exame / Consulta)
+  String get categoryLabel {
+    switch (category) {
+      case MedicationCategory.remedio:  return 'Medicamento';
+      case MedicationCategory.exame:    return 'Exame';
+      case MedicationCategory.consulta: return 'Consulta';
+    }
+  }
+
+  /// Singular/plural genérico para contagem na Home
+  /// Evita usar "dose" para itens que não são medicamentos
+  static String itemCountLabel(int count, {bool mixed = false}) {
+    if (mixed) {
+      return count == 1 ? '1 item programado' : '$count itens programados';
+    }
+    return count == 1 ? '1 atividade' : '$count atividades';
   }
 }

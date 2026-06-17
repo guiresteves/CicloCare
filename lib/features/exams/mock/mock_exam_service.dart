@@ -1,5 +1,9 @@
 import '../models/exam.dart';
 
+// ════════════════════════════════════════════════════════════
+//  MOCK EXAM SERVICE
+//  Arquivo: lib/features/exams/mock/mock_exam_service.dart
+// ════════════════════════════════════════════════════════════
 
 class MockExamService {
   MockExamService._();

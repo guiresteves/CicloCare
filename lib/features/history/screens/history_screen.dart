@@ -5,6 +5,17 @@ import '../../../core/theme/app_text_styles.dart';
 import '../models/history_item.dart';
 import '../mock/mock_history_service.dart';
 
+// ════════════════════════════════════════════════════════════
+//  HISTORY SCREEN — CicloCare
+//  Arquivo: lib/features/history/screens/history_screen.dart
+//
+//  Alteração 5:
+//  • Timeline médica moderna
+//  • Filtros por categoria: Todos / Medicamentos / Exames
+//  • Filtros por período: Hoje / 7 dias / 30 dias / Personalizado
+//  • Ordenação: Mais recentes / Mais antigos
+//  • Cards modernos com ícone, status e detalhe
+// ════════════════════════════════════════════════════════════
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -14,7 +25,7 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  // Filtros
+  // ── Filtros ──────────────────────────────────────────────
   HistoryCategory? _category; // null = todos
   int _periodIndex  = 1;      // 0=hoje, 1=7d, 2=30d, 3=custom
   bool _newestFirst = true;
@@ -57,7 +68,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return map;
   }
 
-  // Estatísticas do período filtrado
+  // ── Estatísticas do período filtrado ─────────────────────
   int get _totalCount  => _items.length;
   int get _takenCount  => _items.where((i) => i.isPositive).length;
   int get _skippedCount=> _items.where((i) =>
@@ -89,15 +100,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
       ),
       body: Column(
         children: [
-          // Barra de filtros
+          // ── Barra de filtros ──────────────────────────────
           _buildFilterBar(),
 
-          // Resumo
+          // ── Resumo ────────────────────────────────────────
           if (_totalCount > 0) _buildSummary(),
 
           const Divider(height: 1),
 
-          // Lista / Vazio
+          // ── Lista / Vazio ─────────────────────────────────
           Expanded(
             child: _items.isEmpty
                 ? _buildEmpty()
@@ -116,7 +127,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  // ════════════════════════════════════════════════════════
   //  BARRA DE FILTROS
+  // ════════════════════════════════════════════════════════
   Widget _buildFilterBar() {
     return Container(
       color: AppColors.white,
@@ -222,7 +235,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  // ════════════════════════════════════════════════════════
   //  RESUMO DE ESTATÍSTICAS
+  // ════════════════════════════════════════════════════════
   Widget _buildSummary() {
     return Container(
       color: AppColors.white,
@@ -251,7 +266,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  // ════════════════════════════════════════════════════════
   //  GRUPO POR DIA (timeline)
+  // ════════════════════════════════════════════════════════
   Widget _buildDayGroup(String date, List<HistoryItem> items,
       int groupIndex, int totalGroups) {
     return Column(
@@ -409,7 +426,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  // ════════════════════════════════════════════════════════
   //  VAZIO
+  // ════════════════════════════════════════════════════════
   Widget _buildEmpty() {
     return Center(
       child: Padding(
@@ -437,7 +456,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  // ════════════════════════════════════════════════════════
   //  PERÍODO PERSONALIZADO
+  // ════════════════════════════════════════════════════════
   Future<void> _pickCustomPeriod() async {
     DateTime tempFrom = _customFrom ?? DateTime.now().subtract(
         const Duration(days: 7));
