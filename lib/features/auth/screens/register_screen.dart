@@ -8,17 +8,6 @@ import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/ciclocare_logo.dart';
 
-// ════════════════════════════════════════════════════════════
-//  REGISTER SCREEN — CicloCare
-//  Arquivo: lib/features/auth/screens/register_screen.dart
-//
-//  Com:
-//  • Máscara de CPF: 000.000.000-00
-//  • Máscara de telefone: (00) 00000-0000
-//  • Indicador de força da senha
-//  • Validação completa
-// ════════════════════════════════════════════════════════════
-
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -57,7 +46,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  // ── Força da senha ───────────────────────────────────────
+  // Força da senha
   void _updatePasswordStrength() {
     final p = _passwordCtrl.text;
     int strength = 0;
@@ -375,7 +364,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 }
 
-// ── Campo com máscara ─────────────────────────────────────────────────────────
+// Campo com máscara
 class _MaskedTextField extends StatelessWidget {
   final String label;
   final String hint;
@@ -413,7 +402,7 @@ class _MaskedTextField extends StatelessWidget {
   }
 }
 
-// ── Formatter de máscara ──────────────────────────────────────────────────────
+// Formatter de máscara
 class _MaskFormatter extends TextInputFormatter {
   final String mask;
   _MaskFormatter(this.mask);
@@ -443,7 +432,7 @@ class _MaskFormatter extends TextInputFormatter {
   }
 }
 
-// ── Indicador de força da senha ───────────────────────────────────────────────
+// Indicador de força da senha
 class _PasswordStrengthIndicator extends StatelessWidget {
   final int strength;
   final Color color;
