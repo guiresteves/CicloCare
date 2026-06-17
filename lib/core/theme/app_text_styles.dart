@@ -1,18 +1,10 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
-// ════════════════════════════════════════════════════════════
-//  APP TEXT STYLES — CicloCare
-//  Arquivo: lib/core/theme/app_text_styles.dart
-//
-//  Tipografia padronizada para todo o app.
-//  Fontes maiores para acessibilidade de idosos.
-// ════════════════════════════════════════════════════════════
-
 class AppTextStyles {
   AppTextStyles._();
 
-  // ── Display ──────────────────────────────────────────────
+  // Display
   static const TextStyle displayLarge = TextStyle(
     fontSize: 32, fontWeight: FontWeight.w800,
     color: AppColors.textPrimary, letterSpacing: -0.5, height: 1.2,
@@ -23,7 +15,7 @@ class AppTextStyles {
     color: AppColors.textPrimary, letterSpacing: -0.3, height: 1.25,
   );
 
-  // ── Títulos ──────────────────────────────────────────────
+  // Títulos
   static const TextStyle headlineLarge = TextStyle(
     fontSize: 22, fontWeight: FontWeight.w800,
     color: AppColors.textPrimary, height: 1.3,
@@ -39,7 +31,7 @@ class AppTextStyles {
     color: AppColors.textPrimary, height: 1.35,
   );
 
-  // ── Corpo ────────────────────────────────────────────────
+  // Corpo
   static const TextStyle bodyLarge = TextStyle(
     fontSize: 17, fontWeight: FontWeight.w400,
     color: AppColors.textPrimary, height: 1.5,
@@ -55,7 +47,7 @@ class AppTextStyles {
     color: AppColors.textSecondary, height: 1.5,
   );
 
-  // ── Labels ───────────────────────────────────────────────
+  // Labels
   static const TextStyle labelLarge = TextStyle(
     fontSize: 16, fontWeight: FontWeight.w600,
     color: AppColors.textPrimary, letterSpacing: 0.1,
@@ -71,7 +63,7 @@ class AppTextStyles {
     color: AppColors.textHint, letterSpacing: 0.5,
   );
 
-  // ── Botões ───────────────────────────────────────────────
+  // Botões
   static const TextStyle buttonLarge = TextStyle(
     fontSize: 18, fontWeight: FontWeight.w700,
     color: AppColors.white, letterSpacing: 0.2,
@@ -82,7 +74,7 @@ class AppTextStyles {
     color: AppColors.white, letterSpacing: 0.2,
   );
 
-  // ── Campos de formulário ─────────────────────────────────
+  // Campos de formulário
   static const TextStyle inputLabel = TextStyle(
     fontSize: 15, fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
@@ -103,13 +95,13 @@ class AppTextStyles {
     color: AppColors.error,
   );
 
-  // ── App Bar ──────────────────────────────────────────────
+  // App Bar
   static const TextStyle appBarTitle = TextStyle(
     fontSize: 20, fontWeight: FontWeight.w800,
     color: AppColors.textPrimary,
   );
 
-  // ── Cards ────────────────────────────────────────────────
+  // Cards
   static const TextStyle cardTitle = TextStyle(
     fontSize: 17, fontWeight: FontWeight.w700,
     color: AppColors.textPrimary,
@@ -125,7 +117,7 @@ class AppTextStyles {
     letterSpacing: 0.2,
   );
 
-  // ── Calendário ───────────────────────────────────────────
+  // Calendário
   static const TextStyle calendarDay = TextStyle(
     fontSize: 26, fontWeight: FontWeight.w800,
     color: AppColors.white,
@@ -136,13 +128,13 @@ class AppTextStyles {
     color: AppColors.white,
   );
 
-  // ── Bottom Nav ───────────────────────────────────────────
+  // Bottom Nav
   static const TextStyle bottomNavLabel = TextStyle(
     fontSize: 11, fontWeight: FontWeight.w600,
     letterSpacing: 0.2,
   );
 
-  // ── Seção ────────────────────────────────────────────────
+  // Seção
   static const TextStyle sectionTitle = TextStyle(
     fontSize: 16, fontWeight: FontWeight.w700,
     color: AppColors.textPrimary, letterSpacing: 0.1,
