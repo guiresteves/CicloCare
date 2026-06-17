@@ -1,11 +1,7 @@
-// Serviço de autenticação mockado (sem backend real)
-// Simula login e cadastro com dados em memória
-
 class MockAuthService {
   MockAuthService._();
   static final MockAuthService instance = MockAuthService._();
 
-  // Usuários pré-cadastrados para teste
   final List<Map<String, String>> _users = [
     {
       'name': 'Maria Silva',
@@ -13,6 +9,7 @@ class MockAuthService {
       'password': '123456',
       'phone': '(11) 91234-5678',
       'cpf': '123.456.789-00',
+      'birthDate': '15/03/1958',
     },
     {
       'name': 'João Santos',
@@ -20,6 +17,7 @@ class MockAuthService {
       'password': '123456',
       'phone': '(21) 98765-4321',
       'cpf': '987.654.321-00',
+      'birthDate': '22/07/1952',
     },
   ];
 
@@ -32,7 +30,6 @@ class MockAuthService {
     await Future.delayed(const Duration(milliseconds: 800));
   }
 
-  /// Retorna null em sucesso, ou mensagem de erro.
   Future<String?> login(String email, String password) async {
     await _fakeDelay();
 
@@ -48,7 +45,6 @@ class MockAuthService {
     return null;
   }
 
-  /// Retorna null em sucesso, ou mensagem de erro.
   Future<String?> register(
     String name,
     String email,
@@ -69,9 +65,47 @@ class MockAuthService {
       'password': password,
       'phone': phone.trim(),
       'cpf': cpf.trim(),
+      'birthDate': '',
     });
 
     _loggedUser = _users.last;
+    return null;
+  }
+
+  /// Atualiza os dados do usuário logado (Alteração 6 — editar perfil)
+  void updateProfile({
+    String? name,
+    String? email,
+    String? phone,
+    String? birthDate,
+  }) {
+    if (_loggedUser == null) return;
+    final idx = _users.indexWhere((u) => u['email'] == _loggedUser!['email']);
+    if (idx == -1) return;
+
+    if (name != null)      _users[idx]['name']      = name;
+    if (email != null)     _users[idx]['email']     = email;
+    if (phone != null)     _users[idx]['phone']     = phone;
+    if (birthDate != null) _users[idx]['birthDate'] = birthDate;
+
+    _loggedUser = _users[idx];
+  }
+
+  /// Altera a senha do usuário logado (Alteração 6)
+  /// Retorna null em sucesso, ou mensagem de erro
+  Future<String?> changePassword(String currentPassword, String newPassword) async {
+    await _fakeDelay();
+    if (_loggedUser == null) return 'Usuário não autenticado.';
+
+    final idx = _users.indexWhere((u) => u['email'] == _loggedUser!['email']);
+    if (idx == -1) return 'Usuário não encontrado.';
+
+    if (_users[idx]['password'] != currentPassword) {
+      return 'Senha atual incorreta.';
+    }
+
+    _users[idx]['password'] = newPassword;
+    _loggedUser = _users[idx];
     return null;
   }
 
