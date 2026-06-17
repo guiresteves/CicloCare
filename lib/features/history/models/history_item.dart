@@ -1,10 +1,5 @@
-// ════════════════════════════════════════════════════════════
-//  MODELO — HistoryItem
-//  Arquivo: lib/features/history/models/history_item.dart
-// ════════════════════════════════════════════════════════════
-
-enum HistoryCategory { medication, exam, consultation }
-enum HistoryAction   { taken, skipped, scheduled, completed, cancelled }
+enum HistoryCategory { medication, exam }
+enum HistoryAction   { taken, skipped, completed, cancelled }
 
 class HistoryItem {
   final String id;
@@ -12,7 +7,7 @@ class HistoryItem {
   final HistoryCategory category;
   final HistoryAction action;
   final DateTime dateTime;
-  final String details;      // dosagem, local, médico, etc.
+  final String details;
   final String observations;
 
   const HistoryItem({
@@ -25,38 +20,31 @@ class HistoryItem {
     this.observations = '',
   });
 
-  // ── Helpers ──────────────────────────────────────────────
-
   String get categoryLabel {
     switch (category) {
-      case HistoryCategory.medication:   return 'Medicamento';
-      case HistoryCategory.exam:         return 'Exame';
-      case HistoryCategory.consultation: return 'Consulta';
+      case HistoryCategory.medication: return 'Medicamento';
+      case HistoryCategory.exam:       return 'Exame';
     }
   }
 
   String get actionLabel {
     switch (action) {
-      case HistoryAction.taken:       return 'Tomado';
-      case HistoryAction.skipped:     return 'Pulado';
-      case HistoryAction.scheduled:   return 'Agendado';
-      case HistoryAction.completed:   return 'Concluído';
-      case HistoryAction.cancelled:   return 'Cancelado';
+      case HistoryAction.taken:     return 'Tomado';
+      case HistoryAction.skipped:   return 'Pulado';
+      case HistoryAction.completed: return 'Realizado';
+      case HistoryAction.cancelled: return 'Cancelado';
     }
   }
 
-  String get formattedDate {
-    return '${dateTime.day.toString().padLeft(2,'0')}/'
-        '${dateTime.month.toString().padLeft(2,'0')}/'
-        '${dateTime.year}';
-  }
+  String get formattedDate =>
+      '${dateTime.day.toString().padLeft(2,'0')}/'
+      '${dateTime.month.toString().padLeft(2,'0')}/'
+      '${dateTime.year}';
 
   String get formattedTime =>
       '${dateTime.hour.toString().padLeft(2,'0')}:'
       '${dateTime.minute.toString().padLeft(2,'0')}';
 
   bool get isPositive =>
-      action == HistoryAction.taken ||
-      action == HistoryAction.completed ||
-      action == HistoryAction.scheduled;
+      action == HistoryAction.taken || action == HistoryAction.completed;
 }
