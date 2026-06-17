@@ -30,18 +30,18 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _screens = [
-      const HomeScreen(),
       const MedicationsScreen(),
       const ExamsScreen(),
+      const HomeScreen(),
       const HistoryScreen(),
       const ProfileScreen(),
     ];
   }
 
   final List<_NavItem> _navItems = const [
-    _NavItem(icon: Icons.home_outlined,        activeIcon: Icons.home_rounded,            label: 'Início'),
     _NavItem(icon: Icons.medication_outlined,  activeIcon: Icons.medication_rounded,      label: 'Remédios'),
     _NavItem(icon: Icons.science_outlined,     activeIcon: Icons.science_rounded,         label: 'Exames'),
+    _NavItem(icon: Icons.home_outlined,        activeIcon: Icons.home_rounded,            label: 'Início'),
     _NavItem(icon: Icons.history_outlined,     activeIcon: Icons.history_rounded,         label: 'Histórico'),
     _NavItem(icon: Icons.person_outline,       activeIcon: Icons.person_rounded,          label: 'Perfil'),
   ];
