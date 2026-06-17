@@ -7,10 +7,6 @@ import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/ciclocare_logo.dart';
 
-// ════════════════════════════════════════════════════════════
-//  LOGIN SCREEN — CicloCare
-//  Arquivo: lib/features/auth/screens/login_screen.dart
-// ════════════════════════════════════════════════════════════
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
