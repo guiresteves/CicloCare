@@ -161,9 +161,7 @@ class _ExamsScreenState extends State<ExamsScreen> {
 
   Color _typeColor(ExamType type) {
     switch (type) {
-      case ExamType.laboratorial:  return AppColors.info;
-      case ExamType.imaging:       return AppColors.night;
-      case ExamType.clinical:      return AppColors.primary;
+      case ExamType.exam:      return AppColors.primary;
       case ExamType.consultation:  return AppColors.morning;
     }
   }
@@ -273,18 +271,14 @@ class _ExamCard extends StatelessWidget {
 
   Color get _color {
     switch (exam.type) {
-      case ExamType.laboratorial:  return AppColors.info;
-      case ExamType.imaging:       return AppColors.night;
-      case ExamType.clinical:      return AppColors.primary;
+      case ExamType.exam:  return AppColors.info;
       case ExamType.consultation:  return AppColors.morning;
     }
   }
 
   IconData get _icon {
     switch (exam.type) {
-      case ExamType.laboratorial:  return Icons.biotech_rounded;
-      case ExamType.imaging:       return Icons.image_search_rounded;
-      case ExamType.clinical:      return Icons.medical_services_rounded;
+      case ExamType.exam:      return Icons.science_outlined;
       case ExamType.consultation:  return Icons.person_outline_rounded;
     }
   }
@@ -514,7 +508,7 @@ class _AddExamSheetState extends State<_AddExamSheet> {
   final _docCtrl  = TextEditingController();
   final _obsCtrl  = TextEditingController();
 
-  ExamType _type      = ExamType.laboratorial;
+  ExamType _type      = ExamType.exam;
   DateTime _date      = DateTime.now().add(const Duration(days: 1));
   String _time        = '07:00';
   bool _isSaving      = false;

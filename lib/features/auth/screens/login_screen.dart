@@ -6,6 +6,7 @@ import '../mock/mock_auth_service.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/ciclocare_logo.dart';
+import '../../home/mock/mock_medication_service.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -45,7 +46,15 @@ class _LoginScreenState extends State<LoginScreen> {
     if (error != null) {
       setState(() => _errorMsg = error);
     } else {
-      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.main, (_) => false);
+      MockMedicationService.instance.setUser(
+        MockAuthService.instance.currentEmail!,
+      );
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.main,
+        (_) => false,
+      );
     }
   }
 

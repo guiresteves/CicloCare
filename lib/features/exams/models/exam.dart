@@ -1,5 +1,14 @@
+// ════════════════════════════════════════════════════════════
+//  MODELO — Exam
+//  Arquivo: lib/features/exams/models/exam.dart
+//
+//  Tipos simplificados: exam | consultation
+// ════════════════════════════════════════════════════════════
+
 enum ExamStatus { scheduled, completed, cancelled }
-enum ExamType   { laboratorial, imaging, clinical, consultation }
+
+// Simplificado conforme solicitado
+enum ExamType { exam, consultation }
 
 class Exam {
   final String id;
@@ -28,37 +37,36 @@ class Exam {
 
   bool get isPast {
     final today = DateTime.now();
-    final d = DateTime(scheduledDate.year, scheduledDate.month, scheduledDate.day);
+    final d = DateTime(
+        scheduledDate.year, scheduledDate.month, scheduledDate.day);
     final t = DateTime(today.year, today.month, today.day);
     return d.isBefore(t);
   }
 
   bool get isToday {
     final now = DateTime.now();
-    return scheduledDate.year  == now.year &&
-           scheduledDate.month == now.month &&
-           scheduledDate.day   == now.day;
+    return scheduledDate.year == now.year &&
+        scheduledDate.month == now.month &&
+        scheduledDate.day == now.day;
   }
 
   String get formattedDate =>
-      '${scheduledDate.day.toString().padLeft(2,'0')}/'
-      '${scheduledDate.month.toString().padLeft(2,'0')}/'
+      '${scheduledDate.day.toString().padLeft(2, '0')}/'
+      '${scheduledDate.month.toString().padLeft(2, '0')}/'
       '${scheduledDate.year}';
 
   String get typeLabel {
     switch (type) {
-      case ExamType.laboratorial:  return 'Laboratorial';
-      case ExamType.imaging:       return 'Imagem';
-      case ExamType.clinical:      return 'Clínico';
-      case ExamType.consultation:  return 'Consulta';
+      case ExamType.exam:         return 'Exame';
+      case ExamType.consultation: return 'Consulta';
     }
   }
 
   String get statusLabel {
     switch (status) {
-      case ExamStatus.scheduled:   return 'Agendado';
-      case ExamStatus.completed:   return 'Concluído';
-      case ExamStatus.cancelled:   return 'Cancelado';
+      case ExamStatus.scheduled:  return 'Agendado';
+      case ExamStatus.completed:  return 'Concluído';
+      case ExamStatus.cancelled:  return 'Cancelado';
     }
   }
 }

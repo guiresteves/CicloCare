@@ -4,6 +4,9 @@ import '../../../core/theme/app_text_styles.dart';
 import '../models/medication.dart';
 import '../mock/mock_medication_service.dart';
 import '../../auth/mock/mock_auth_service.dart';
+import '../../notifications/mock/mock_notification_service.dart';
+import '../../notifications/screens/notifications_screen.dart';
+import '../../main/main_screen.dart';
 import 'medication_dose_card.dart';
 import 'dose_action_modal.dart';
 import 'dose_entry.dart';
@@ -22,82 +25,122 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   static const List<String> _monthNames = [
-    '','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'
+    '', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
   ];
   static const List<String> _weekNames = [
-    '','Seg','Ter','Qua','Qui','Sex','Sáb','Dom'
+    '', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'
   ];
 
   late String _userName;
   late List<DateTime> _calendarDays;
   int _selectedDayIndex = 0;
+  late List<DoseEntry> _doses = [];
 
-  // Cada dose é uma combinação de medicamento + horário
-  late List<DoseEntry> _doses;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadDoses();
+  }
 
   @override
   void initState() {
     super.initState();
-    _userName     = MockAuthService.instance.loggedUser?['name'] ?? 'Usuário';
-    _calendarDays = List.generate(14, (i) => DateTime.now().add(Duration(days: i)));
+    _userName = MockAuthService.instance.loggedUser?['name'] ?? 'Usuário';
+    _calendarDays =
+        List.generate(14, (i) => DateTime.now().add(Duration(days: i)));
     _loadDoses();
   }
 
   DateTime get _selectedDay => _calendarDays[_selectedDayIndex];
 
   void _loadDoses() {
-    final meds = MockMedicationService.instance.getActiveOn(_selectedDay);
+    print('LOAD DOSES CHAMADO');
+
+    final meds =
+        MockMedicationService.instance.getActiveOn(_selectedDay);
+
+    print('MEDICAMENTOS ENCONTRADOS: ${meds.length}');
+
+    for (final med in meds) {
+      print(
+        'MED: ${med.name} | INICIO: ${med.startDate} | FIM: ${med.endDate}'
+      );
+    }
+
     _doses = [];
+
     for (final med in meds) {
       for (final time in med.times) {
         _doses.add(DoseEntry(med: med, time: time));
       }
     }
-    // Ordena por horário
+
     _doses.sort((a, b) => a.time.compareTo(b.time));
   }
 
-  // ── Progresso ────────────────────────────────────────────
   int get _totalDoses => _doses.length;
-  int get _doneDoses  => _doses.where((d) =>
-      d.med.statusFor(_selectedDay, d.time) == MedicationStatus.taken ||
-      d.med.statusFor(_selectedDay, d.time) == MedicationStatus.skipped).length;
+  int get _doneDoses => _doses.where((d) {
+        final s = d.med.statusFor(_selectedDay, d.time);
+        return s == MedicationStatus.taken ||
+            s == MedicationStatus.skipped;
+      }).length;
+  double get _progress =>
+      _totalDoses == 0 ? 0 : _doneDoses / _totalDoses;
 
-  double get _progress => _totalDoses == 0 ? 0 : _doneDoses / _totalDoses;
-
-  // ── Filtra doses por período ─────────────────────────────
   List<DoseEntry> _dosesForPeriod(String period) =>
       _doses.where((d) => Medication.periodOf(d.time) == period).toList();
+
+  String _periodSubtitle(List<DoseEntry> doses) {
+    final hasOnlyMeds =
+        doses.every((d) => d.med.category == MedicationCategory.remedio);
+    final count = doses.length;
+    if (hasOnlyMeds) {
+      return count == 1
+          ? '1 dose programada'
+          : '$count doses programadas';
+    }
+    return count == 1
+        ? '1 item programado'
+        : '$count itens programados';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: RefreshIndicator(
-              color: AppColors.primary,
-              onRefresh: () async => setState(_loadDoses),
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-                children: [
-                  _buildProgressSection(),
-                  const SizedBox(height: 24),
-                  if (_doses.isEmpty)
-                    _buildEmptyState()
-                  else ...[
-                    _buildPeriodSection('Manhã', Icons.wb_sunny_outlined, AppColors.morning, AppColors.morningLight),
-                    _buildPeriodSection('Tarde', Icons.wb_cloudy_outlined, AppColors.afternoon, AppColors.afternoonLight),
-                    _buildPeriodSection('Noite', Icons.nights_stay_outlined, AppColors.night, AppColors.nightLight),
-                  ],
+      body: Column(children: [
+        _buildHeader(),
+        Expanded(
+          child: RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: () async => setState(_loadDoses),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+              children: [
+                _buildProgressSection(),
+                const SizedBox(height: 24),
+                if (_doses.isEmpty)
+                  _buildEmptyState()
+                else ...[
+                  _buildPeriodSection('Manhã',
+                      Icons.wb_sunny_outlined,
+                      AppColors.morning,
+                      AppColors.morningLight),
+                  _buildPeriodSection('Tarde',
+                      Icons.wb_cloudy_outlined,
+                      AppColors.afternoon,
+                      AppColors.afternoonLight),
+                  _buildPeriodSection('Noite',
+                      Icons.nights_stay_outlined,
+                      AppColors.night,
+                      AppColors.nightLight),
                 ],
-              ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 
@@ -105,6 +148,8 @@ class _HomeScreenState extends State<HomeScreen> {
   //  HEADER
   // ════════════════════════════════════════════════════════
   Widget _buildHeader() {
+    final unread = MockNotificationService.instance.unreadCount;
+
     return Container(
       decoration: const BoxDecoration(
         gradient: AppColors.headerGradient,
@@ -117,139 +162,179 @@ class _HomeScreenState extends State<HomeScreen> {
         bottom: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-          child: Column(
-            children: [
-              // ── Perfil ──────────────────────────────────
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 28,
-                    backgroundColor: AppColors.white.withOpacity(0.25),
-                    child: const Icon(Icons.person_rounded,
-                      color: AppColors.white, size: 32),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('TITULAR',
-                          style: TextStyle(
-                            color: Colors.white70, fontSize: 11,
-                            fontWeight: FontWeight.w700, letterSpacing: 1.5)),
-                        const SizedBox(height: 2),
-                        Text(_userName,
-                          style: AppTextStyles.headlineMedium.copyWith(
-                            color: AppColors.white)),
-                      ],
-                    ),
-                  ),
-                  _headerBtn(Icons.notifications_outlined),
-                  const SizedBox(width: 8),
-                  _headerBtn(Icons.settings_outlined),
-                ],
+          child: Column(children: [
+            Row(children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: AppColors.white.withOpacity(0.25),
+                child: const Icon(Icons.person_rounded,
+                    color: AppColors.white, size: 32),
               ),
-
-              const SizedBox(height: 22),
-
-              // ── Calendário ──────────────────────────────
-              SizedBox(
-                height: 86,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _calendarDays.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (_, i) {
-                    final selected = i == _selectedDayIndex;
-                    final date = _calendarDays[i];
-                    final isToday = i == 0;
-
-                    // Conta doses do dia para o indicador
-                    final meds = MockMedicationService.instance.getActiveOn(date);
-                    final hasDoses = meds.isNotEmpty;
-
-                    return GestureDetector(
-                      onTap: () => setState(() {
-                        _selectedDayIndex = i;
-                        _loadDoses();
-                      }),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        width: 58,
-                        decoration: BoxDecoration(
-                          color: selected
-                              ? AppColors.white.withOpacity(0.25)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: selected
-                                ? AppColors.white
-                                : AppColors.white.withOpacity(0.3),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  _monthNames[date.month],
-                                  style: TextStyle(
-                                    color: selected ? AppColors.white : AppColors.white.withOpacity(0.7),
-                                    fontSize: 11, fontWeight: FontWeight.w600),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  date.day.toString(),
-                                  style: TextStyle(
-                                    color: AppColors.white,
-                                    fontSize: 24,
-                                    fontWeight: selected ? FontWeight.w900 : FontWeight.w600),
-                                ),
-                                Text(
-                                  isToday ? 'Hoje' : _weekNames[date.weekday],
-                                  style: TextStyle(
-                                    color: selected ? AppColors.white : AppColors.white.withOpacity(0.7),
-                                    fontSize: 11, fontWeight: FontWeight.w600),
-                                ),
-                              ],
-                            ),
-                            if (hasDoses)
-                              Positioned(
-                                top: 6, right: 8,
-                                child: Container(
-                                  width: 6, height: 6,
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.white,
-                                    shape: BoxShape.circle),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('TITULAR',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.5)),
+                    const SizedBox(height: 2),
+                    Text(_userName,
+                        style: AppTextStyles.headlineMedium
+                            .copyWith(color: AppColors.white)),
+                  ],
                 ),
               ),
-            ],
-          ),
+
+              // ── Botão de Notificações ──────────────────
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const NotificationsScreen()),
+                ).then((_) => setState(() {})),
+                child: Stack(clipBehavior: Clip.none, children: [
+                  _headerBtn(Icons.notifications_outlined),
+                  if (unread > 0)
+                    Positioned(
+                      top: -2, right: -2,
+                      child: Container(
+                        width: 18, height: 18,
+                        decoration: const BoxDecoration(
+                          color: AppColors.warning,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            unread > 9 ? '9+' : '$unread',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                      ),
+                    ),
+                ]),
+              ),
+              const SizedBox(width: 8),
+
+              // ── Botão de Configurações → Perfil ────────
+              GestureDetector(
+                onTap: () {
+                  // Navega para a aba de Perfil (índice 4) no MainScreen
+                  final mainState = context.findAncestorStateOfType<MainScreenState>();
+                  mainState?.navigateTo(4);
+                },
+                child: _headerBtn(Icons.settings_outlined),
+              ),
+            ]),
+
+            const SizedBox(height: 22),
+
+            // Calendário
+            SizedBox(
+              height: 86,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _calendarDays.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (_, i) {
+                  final selected = i == _selectedDayIndex;
+                  final date = _calendarDays[i];
+                  final isToday = i == 0;
+                  final meds =
+                      MockMedicationService.instance.getActiveOn(date);
+                  final hasDoses = meds.isNotEmpty;
+
+                  return GestureDetector(
+                    onTap: () => setState(() {
+                      _selectedDayIndex = i;
+                      _loadDoses();
+                    }),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 58,
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? AppColors.white.withOpacity(0.25)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: selected
+                              ? AppColors.white
+                              : AppColors.white.withOpacity(0.3),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Stack(alignment: Alignment.center, children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(_monthNames[date.month],
+                                style: TextStyle(
+                                    color: selected
+                                        ? AppColors.white
+                                        : AppColors.white
+                                            .withOpacity(0.7),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 2),
+                            Text(date.day.toString(),
+                                style: TextStyle(
+                                    color: AppColors.white,
+                                    fontSize: 24,
+                                    fontWeight: selected
+                                        ? FontWeight.w900
+                                        : FontWeight.w600)),
+                            Text(
+                                isToday
+                                    ? 'Hoje'
+                                    : _weekNames[date.weekday],
+                                style: TextStyle(
+                                    color: selected
+                                        ? AppColors.white
+                                        : AppColors.white
+                                            .withOpacity(0.7),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                        if (hasDoses)
+                          Positioned(
+                            top: 6, right: 8,
+                            child: Container(
+                              width: 6, height: 6,
+                              decoration: const BoxDecoration(
+                                  color: AppColors.white,
+                                  shape: BoxShape.circle),
+                            ),
+                          ),
+                      ]),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ]),
         ),
       ),
     );
   }
 
   Widget _headerBtn(IconData icon) => Container(
-    width: 44, height: 44,
-    decoration: BoxDecoration(
-      color: AppColors.white.withOpacity(0.2),
-      shape: BoxShape.circle),
-    child: Icon(icon, color: AppColors.white, size: 24),
-  );
+        width: 44, height: 44,
+        decoration: BoxDecoration(
+            color: AppColors.white.withOpacity(0.2),
+            shape: BoxShape.circle),
+        child: Icon(icon, color: AppColors.white, size: 24),
+      );
 
   // ════════════════════════════════════════════════════════
-  //  PROGRESS
+  //  PROGRESSO
   // ════════════════════════════════════════════════════════
   Widget _buildProgressSection() {
     return Container(
@@ -259,42 +344,42 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.divider),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Medicamentos do Dia',
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Atividades do Dia',
                 style: AppTextStyles.headlineSmall),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
                   color: AppColors.primaryLight,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text('$_doneDoses de $_totalDoses',
-                  style: AppTextStyles.labelMedium.copyWith(color: AppColors.primary)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: _progress,
-              minHeight: 10,
-              backgroundColor: AppColors.inputBg,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  borderRadius: BorderRadius.circular(20)),
+              child: Text('$_doneDoses de $_totalDoses',
+                  style: AppTextStyles.labelMedium
+                      .copyWith(color: AppColors.primary)),
             ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: LinearProgressIndicator(
+            value: _progress,
+            minHeight: 12,
+            backgroundColor: AppColors.inputBg,
+            valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.primary),
           ),
-          const SizedBox(height: 8),
-          Text(
-            '${(_progress * 100).toStringAsFixed(0)}% concluído',
-            style: AppTextStyles.labelSmall.copyWith(color: AppColors.textSecondary),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '${(_progress * 100).toStringAsFixed(0)}% concluído',
+          style: AppTextStyles.labelSmall
+              .copyWith(color: AppColors.textSecondary, fontSize: 14),
+        ),
+      ]),
     );
   }
 
@@ -309,36 +394,32 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Cabeçalho do período
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: 8),
-              Text(period,
-                style: AppTextStyles.sectionTitle.copyWith(color: color)),
-              const Spacer(),
-              Text('${doses.length} ${doses.length == 1 ? 'dose' : 'doses'}',
+              color: bgColor,
+              borderRadius: BorderRadius.circular(14)),
+          child: Row(children: [
+            Icon(icon, color: color, size: 22),
+            const SizedBox(width: 8),
+            Text(period,
+                style:
+                    AppTextStyles.sectionTitle.copyWith(color: color)),
+            const Spacer(),
+            Text(_periodSubtitle(doses),
                 style: AppTextStyles.labelSmall.copyWith(color: color)),
-            ],
-          ),
+          ]),
         ),
         const SizedBox(height: 10),
-
-        // Cards de dose
         ...doses.map((d) => Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: MedicationDoseCard(
-            dose: d,
-            selectedDay: _selectedDay,
-            onTap: () => _showDoseAction(d),
-          ),
-        )),
+              padding: const EdgeInsets.only(bottom: 12),
+              child: MedicationDoseCard(
+                dose: d,
+                selectedDay: _selectedDay,
+                onTap: () => _showDoseAction(d),
+              ),
+            )),
         const SizedBox(height: 14),
       ],
     );
@@ -351,24 +432,23 @@ class _HomeScreenState extends State<HomeScreen> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.only(top: 48),
-        child: Column(
-          children: [
-            Container(
-              width: 90, height: 90,
-              decoration: const BoxDecoration(
+        child: Column(children: [
+          Container(
+            width: 90, height: 90,
+            decoration: const BoxDecoration(
                 color: AppColors.primaryLight, shape: BoxShape.circle),
-              child: const Icon(Icons.event_available_rounded,
+            child: const Icon(Icons.event_available_rounded,
                 color: AppColors.primary, size: 46),
-            ),
-            const SizedBox(height: 20),
-            Text('Nenhum medicamento\npara este dia',
+          ),
+          const SizedBox(height: 20),
+          Text('Nenhuma atividade\npara este dia',
               textAlign: TextAlign.center,
               style: AppTextStyles.headlineSmall),
-            const SizedBox(height: 8),
-            Text('Selecione outro dia no calendário.',
-              style: AppTextStyles.bodyMedium, textAlign: TextAlign.center),
-          ],
-        ),
+          const SizedBox(height: 8),
+          Text('Selecione outro dia no calendário.',
+              style: AppTextStyles.bodyMedium,
+              textAlign: TextAlign.center),
+        ]),
       ),
     );
   }
@@ -384,13 +464,8 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (_) => DoseActionModal(
         dose: d,
         selectedDay: _selectedDay,
-        onAction: (status) {
-          d.med.setStatus(_selectedDay, d.time, status);
-          setState(() {});
-        },
+        onAction: (status) => setState(() {}),
       ),
     );
   }
 }
-
-// ── Dose Entry: medicamento + horário ────────────────────────────────────────

@@ -26,6 +26,8 @@ class MockAuthService {
   Map<String, String>? get loggedUser => _loggedUser;
   bool get isLoggedIn => _loggedUser != null;
 
+  String? get currentEmail => _loggedUser?['email'];
+
   Future<void> _fakeDelay() async {
     await Future.delayed(const Duration(milliseconds: 800));
   }
