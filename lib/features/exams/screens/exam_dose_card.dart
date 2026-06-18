@@ -1,81 +1,76 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../models/medication.dart';
-import 'dose_entry.dart';
+import '../models/exam.dart';
 
 // ════════════════════════════════════════════════════════════
-//  MEDICATION DOSE CARD
-//  Arquivo: lib/features/home/screens/medication_dose_card.dart
+//  EXAM DOSE CARD
+//  Arquivo: lib/features/exams/screens/exam_dose_card.dart
 //
-//  Acessibilidade melhorada:
+//  Card de exame/consulta com o MESMO padrão visual do
+//  MedicationDoseCard (lib/features/home/screens/medication_dose_card.dart):
 //  • Fontes maiores (mínimo 16px)
 //  • Espaçamento generoso
 //  • Alto contraste
 //  • Área de toque ampla (min 64px de altura)
 // ════════════════════════════════════════════════════════════
 
-class MedicationDoseCard extends StatelessWidget {
-  final DoseEntry dose;
-  final DateTime selectedDay;
+class ExamDoseCard extends StatelessWidget {
+  final Exam exam;
   final VoidCallback onTap;
 
-  const MedicationDoseCard({
+  const ExamDoseCard({
     super.key,
-    required this.dose,
-    required this.selectedDay,
+    required this.exam,
     required this.onTap,
   });
 
-  IconData get _categoryIcon {
-    switch (dose.med.category) {
-      case MedicationCategory.remedio:
-        return Icons.medication_rounded;
-      case MedicationCategory.exame:
-        return Icons.biotech_rounded;
-      case MedicationCategory.consulta:
-        return Icons.medical_services_rounded;
-    }
-  }
+  IconData get _categoryIcon => exam.type == ExamType.consultation
+      ? Icons.medical_services_rounded
+      : Icons.biotech_rounded;
 
   @override
   Widget build(BuildContext context) {
-    final Medication med = dose.med;
-    final String time    = dose.time;
-    final status = med.statusFor(selectedDay, time);
-
-    final isDone        = status == MedicationStatus.taken;
-    final isSkipped     = status == MedicationStatus.skipped;
-    final isOverdue     = status == MedicationStatus.overdue;
+    final isDone    = exam.status == ExamStatus.completed;
+    final isSkipped = exam.status == ExamStatus.cancelled;
+    final isOverdue = exam.status == ExamStatus.scheduled && exam.isPast;
     final isDoneOrSkipped = isDone || isSkipped;
 
     final cardBg    = isDone    ? AppColors.doneLight
-                    : isSkipped ? AppColors.warningLight
-                    : isOverdue ? AppColors.overdueLight
-                    :             AppColors.pendingLight;
+                     : isSkipped ? AppColors.warningLight
+                     : isOverdue ? AppColors.overdueLight
+                     :             AppColors.pendingLight;
     final border    = isDone    ? AppColors.doneBorder
-                    : isSkipped ? AppColors.warning.withOpacity(0.4)
-                    : isOverdue ? AppColors.overdueBorder
-                    :             AppColors.pendingBorder;
+                     : isSkipped ? AppColors.warning.withOpacity(0.4)
+                     : isOverdue ? AppColors.overdueBorder
+                     :             AppColors.pendingBorder;
     final nameColor = isDoneOrSkipped ? AppColors.done
-                    : isOverdue       ? AppColors.overdue
-                    :                   AppColors.textPrimary;
+                     : isOverdue       ? AppColors.overdue
+                     :                   AppColors.textPrimary;
     final timeColor = isDone    ? AppColors.done
-                    : isSkipped ? AppColors.warning
-                    : isOverdue ? AppColors.overdue
-                    :             AppColors.primary;
+                     : isSkipped ? AppColors.warning
+                     : isOverdue ? AppColors.overdue
+                     :             AppColors.primary;
     final iconBg    = isDone    ? AppColors.done.withOpacity(0.12)
-                    : isSkipped ? AppColors.warningLight
-                    : isOverdue ? AppColors.overdueLight
-                    :             AppColors.white.withOpacity(0.9);
+                     : isSkipped ? AppColors.warningLight
+                     : isOverdue ? AppColors.overdueLight
+                     :             AppColors.white.withOpacity(0.9);
     final iconColor = isDone    ? AppColors.done
-                    : isSkipped ? AppColors.warning
-                    : isOverdue ? AppColors.overdue
-                    :             AppColors.primary;
+                     : isSkipped ? AppColors.warning
+                     : isOverdue ? AppColors.overdue
+                     :             AppColors.primary;
+
+    final subtitle = exam.doctor.isNotEmpty && exam.location.isNotEmpty
+        ? '${exam.doctor} · ${exam.location}'
+        : exam.doctor.isNotEmpty
+            ? exam.doctor
+            : exam.location.isNotEmpty
+                ? exam.location
+                : exam.typeLabel;
 
     return Semantics(
-      label: '${med.name}, ${med.dosage}, horário $time, '
-          'status ${_statusSemantics(status)}',
+      label: '${exam.name}, ${exam.typeLabel}, horário ${exam.time}, '
+          'status ${_statusSemantics(isDone, isSkipped, isOverdue)}',
       button: true,
       child: GestureDetector(
         onTap: onTap,
@@ -100,7 +95,7 @@ class MedicationDoseCard extends StatelessWidget {
                     ? const Icon(Icons.check_circle_rounded,
                         color: AppColors.done, size: 32)
                     : isSkipped
-                        ? const Icon(Icons.skip_next_rounded,
+                        ? const Icon(Icons.close_rounded,
                             color: AppColors.warning, size: 32)
                         : Icon(_categoryIcon, color: iconColor, size: 32),
               ),
@@ -114,7 +109,9 @@ class MedicationDoseCard extends StatelessWidget {
                     Row(children: [
                       Expanded(
                         child: Text(
-                          med.name,
+                          exam.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.cardTitle.copyWith(
                             fontSize: 18,
                             color: nameColor,
@@ -149,7 +146,7 @@ class MedicationDoseCard extends StatelessWidget {
                               const SizedBox(width: 4),
                             ],
                             Text(
-                              time,
+                              exam.time,
                               style: AppTextStyles.cardBadge.copyWith(
                                 color: timeColor,
                                 fontSize: 15,
@@ -165,9 +162,11 @@ class MedicationDoseCard extends StatelessWidget {
                     ]),
                     const SizedBox(height: 6),
 
-                    // Dosagem
+                    // Médico/local (ou tipo, se ambos vazios)
                     Text(
-                      med.dosage,
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.cardSubtitle.copyWith(
                         fontSize: 16,
                         color: isDoneOrSkipped
@@ -177,13 +176,11 @@ class MedicationDoseCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
 
-                    // Badges + status
+                    // Badge + status
                     Row(children: [
-                      _badge(med.categoryLabel, isDoneOrSkipped),
-                      const SizedBox(width: 8),
-                      _badge(med.frequency, isDoneOrSkipped),
+                      _badge(exam.typeLabel, isDoneOrSkipped),
                       const Spacer(),
-                      _statusLabel(status),
+                      _statusLabel(isDone, isSkipped, isOverdue),
                     ]),
                   ],
                 ),
@@ -210,26 +207,21 @@ class MedicationDoseCard extends StatelessWidget {
         ),
       );
 
-  Widget _statusLabel(MedicationStatus status) {
+  Widget _statusLabel(bool isDone, bool isSkipped, bool isOverdue) {
     String label;
     Color color;
-    switch (status) {
-      case MedicationStatus.taken:
-        label = '✓ Concluído';
-        color = AppColors.done;
-        break;
-      case MedicationStatus.skipped:
-        label = '↷ Pulado';
-        color = AppColors.warning;
-        break;
-      case MedicationStatus.overdue:
-        label = '! Atrasado';
-        color = AppColors.overdue;
-        break;
-      default:
-        label = 'Pendente';
-        color = AppColors.primary;
-        break;
+    if (isDone) {
+      label = '✓ Concluído';
+      color = AppColors.done;
+    } else if (isSkipped) {
+      label = '✕ Cancelado';
+      color = AppColors.warning;
+    } else if (isOverdue) {
+      label = '! Atrasado';
+      color = AppColors.overdue;
+    } else {
+      label = 'Agendado';
+      color = AppColors.primary;
     }
     return Text(
       label,
@@ -238,12 +230,10 @@ class MedicationDoseCard extends StatelessWidget {
     );
   }
 
-  String _statusSemantics(MedicationStatus s) {
-    switch (s) {
-      case MedicationStatus.taken:   return 'concluído';
-      case MedicationStatus.skipped: return 'pulado';
-      case MedicationStatus.overdue: return 'atrasado';
-      default:                       return 'pendente';
-    }
+  String _statusSemantics(bool isDone, bool isSkipped, bool isOverdue) {
+    if (isDone) return 'concluído';
+    if (isSkipped) return 'cancelado';
+    if (isOverdue) return 'atrasado';
+    return 'agendado';
   }
 }

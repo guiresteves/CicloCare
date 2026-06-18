@@ -14,35 +14,107 @@ class MainScreen extends StatefulWidget {
   @override
   State<MainScreen> createState() => MainScreenState();
 }
-class MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
 
-  void navigateTo(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
+class MainScreenState extends State<MainScreen>
+    with TickerProviderStateMixin {
+  int _currentIndex = 2; // começa na Home
 
   late final List<Widget> _screens;
+  late final List<AnimationController> _iconControllers;
+  late final List<Animation<double>> _scaleAnims;
+
+  // Índice da aba Home
+  static const int _homeIndex = 2;
 
   @override
   void initState() {
     super.initState();
+
     _screens = [
       const MedicationsScreen(),
       const ExamsScreen(),
-      const HomeScreen(),
+      // Usa o homeScreenKey para permitir reload externo
+      HomeScreen(key: homeScreenKey),
       const HistoryScreen(),
       const ProfileScreen(),
     ];
+
+    _iconControllers = List.generate(
+      5,
+      (_) => AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 300),
+      ),
+    );
+
+    _scaleAnims = _iconControllers
+        .map((c) => Tween<double>(begin: 1.0, end: 1.25).animate(
+              CurvedAnimation(parent: c, curve: Curves.easeOutBack),
+            ))
+        .toList();
+
+    // Anima o ícone inicial (Home)
+    _iconControllers[_currentIndex].forward();
+  }
+
+  @override
+  void dispose() {
+    for (final c in _iconControllers) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  /// Navega para uma aba pelo índice.
+  /// Se o destino for a Home, dispara reload() para sincronizar os dados.
+  void navigateTo(int index) {
+    if (index == _currentIndex) {
+      // Já está na aba — se for Home, recarrega mesmo assim
+      if (index == _homeIndex) {
+        homeScreenKey.currentState?.reload();
+      }
+      return;
+    }
+
+    _iconControllers[_currentIndex].reverse();
+    setState(() => _currentIndex = index);
+    _iconControllers[index].forward();
+
+    // Sempre que voltar para a Home, recarrega os dados
+    if (index == _homeIndex) {
+      // Pós-frame para garantir que o widget já está montado
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        homeScreenKey.currentState?.reload();
+      });
+    }
   }
 
   final List<_NavItem> _navItems = const [
-    _NavItem(icon: Icons.medication_outlined,  activeIcon: Icons.medication_rounded,      label: 'Remédios'),
-    _NavItem(icon: Icons.science_outlined,     activeIcon: Icons.science_rounded,         label: 'Exames'),
-    _NavItem(icon: Icons.home_outlined,        activeIcon: Icons.home_rounded,            label: 'Início'),
-    _NavItem(icon: Icons.history_outlined,     activeIcon: Icons.history_rounded,         label: 'Histórico'),
-    _NavItem(icon: Icons.person_outline,       activeIcon: Icons.person_rounded,          label: 'Perfil'),
+    _NavItem(
+      icon: Icons.medication_outlined,
+      activeIcon: Icons.medication_rounded,
+      label: 'Remédios',
+    ),
+    _NavItem(
+      icon: Icons.science_outlined,
+      activeIcon: Icons.science_rounded,
+      label: 'Exames',
+    ),
+    _NavItem(
+      icon: Icons.home_outlined,
+      activeIcon: Icons.home_rounded,
+      label: 'Início',
+    ),
+    _NavItem(
+      icon: Icons.history_outlined,
+      activeIcon: Icons.history_rounded,
+      label: 'Histórico',
+    ),
+    _NavItem(
+      icon: Icons.person_outline,
+      activeIcon: Icons.person_rounded,
+      label: 'Perfil',
+    ),
   ];
 
   @override
@@ -81,22 +153,24 @@ class MainScreenState extends State<MainScreen> {
               return Expanded(
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onTap: () => setState(() => _currentIndex = index),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Ícone com indicador
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: selected
-                                ? AppColors.primaryLight
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
+                  onTap: () => navigateTo(index),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Pill animado + ícone com scale
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOut,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: selected
+                              ? AppColors.primaryLight
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                        child: ScaleTransition(
+                          scale: _scaleAnims[index],
                           child: Icon(
                             selected ? item.activeIcon : item.icon,
                             color: selected
@@ -105,21 +179,23 @@ class MainScreenState extends State<MainScreen> {
                             size: 26,
                           ),
                         ),
-                        const SizedBox(height: 3),
-                        // Label
-                        Text(
-                          item.label,
-                          style: AppTextStyles.bottomNavLabel.copyWith(
-                            color: selected
-                                ? AppColors.primary
-                                : AppColors.textHint,
-                            fontWeight: selected
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                          ),
+                      ),
+                      const SizedBox(height: 3),
+
+                      // Label com transição de estilo
+                      AnimatedDefaultTextStyle(
+                        duration: const Duration(milliseconds: 200),
+                        style: AppTextStyles.bottomNavLabel.copyWith(
+                          color: selected
+                              ? AppColors.primary
+                              : AppColors.textHint,
+                          fontWeight: selected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                         ),
-                      ],
-                    ),
+                        child: Text(item.label),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -135,5 +211,9 @@ class _NavItem {
   final IconData icon;
   final IconData activeIcon;
   final String label;
-  const _NavItem({required this.icon, required this.activeIcon, required this.label});
+  const _NavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+  });
 }

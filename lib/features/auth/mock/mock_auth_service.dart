@@ -1,3 +1,13 @@
+import '../../home/mock/mock_medication_service.dart';
+import '../../exams/mock/mock_exam_service.dart';
+import '../../history/mock/mock_history_service.dart';
+import '../../notifications/mock/mock_notification_service.dart';
+
+// ════════════════════════════════════════════════════════════
+//  MOCK AUTH SERVICE
+//  Arquivo: lib/features/auth/mock/mock_auth_service.dart
+// ════════════════════════════════════════════════════════════
+
 class MockAuthService {
   MockAuthService._();
   static final MockAuthService instance = MockAuthService._();
@@ -26,12 +36,18 @@ class MockAuthService {
   Map<String, String>? get loggedUser => _loggedUser;
   bool get isLoggedIn => _loggedUser != null;
 
-  String? get currentEmail => _loggedUser?['email'];
+  Future<void> _fakeDelay() async =>
+      Future.delayed(const Duration(milliseconds: 800));
 
-  Future<void> _fakeDelay() async {
-    await Future.delayed(const Duration(milliseconds: 800));
+  // ── Inicializa todos os serviços para o usuário ──────────
+  void _initServices(String email) {
+    MockMedicationService.instance.setUser(email);
+    MockExamService.instance.setUser(email);
+    MockHistoryService.instance.setUser(email);
+    MockNotificationService.instance.setUser(email);
   }
 
+  // ── Login ────────────────────────────────────────────────
   Future<String?> login(String email, String password) async {
     await _fakeDelay();
 
@@ -44,9 +60,11 @@ class MockAuthService {
     if (user['password'] != password) return 'Senha incorreta.';
 
     _loggedUser = user;
+    _initServices(user['email']!);
     return null;
   }
 
+  // ── Registro ─────────────────────────────────────────────
   Future<String?> register(
     String name,
     String email,
@@ -71,10 +89,12 @@ class MockAuthService {
     });
 
     _loggedUser = _users.last;
+    // Novo usuário → serviços iniciam vazios (putIfAbsent com [])
+    _initServices(emailLower);
     return null;
   }
 
-  /// Atualiza os dados do usuário logado (Alteração 6 — editar perfil)
+  // ── Atualizar perfil ─────────────────────────────────────
   void updateProfile({
     String? name,
     String? email,
@@ -82,24 +102,26 @@ class MockAuthService {
     String? birthDate,
   }) {
     if (_loggedUser == null) return;
-    final idx = _users.indexWhere((u) => u['email'] == _loggedUser!['email']);
+    final idx =
+        _users.indexWhere((u) => u['email'] == _loggedUser!['email']);
     if (idx == -1) return;
 
-    if (name != null)      _users[idx]['name']      = name;
-    if (email != null)     _users[idx]['email']     = email;
-    if (phone != null)     _users[idx]['phone']     = phone;
+    if (name != null) _users[idx]['name'] = name;
+    if (email != null) _users[idx]['email'] = email;
+    if (phone != null) _users[idx]['phone'] = phone;
     if (birthDate != null) _users[idx]['birthDate'] = birthDate;
 
     _loggedUser = _users[idx];
   }
 
-  /// Altera a senha do usuário logado (Alteração 6)
-  /// Retorna null em sucesso, ou mensagem de erro
-  Future<String?> changePassword(String currentPassword, String newPassword) async {
+  // ── Alterar senha ────────────────────────────────────────
+  Future<String?> changePassword(
+      String currentPassword, String newPassword) async {
     await _fakeDelay();
     if (_loggedUser == null) return 'Usuário não autenticado.';
 
-    final idx = _users.indexWhere((u) => u['email'] == _loggedUser!['email']);
+    final idx =
+        _users.indexWhere((u) => u['email'] == _loggedUser!['email']);
     if (idx == -1) return 'Usuário não encontrado.';
 
     if (_users[idx]['password'] != currentPassword) {
@@ -111,5 +133,31 @@ class MockAuthService {
     return null;
   }
 
-  void logout() => _loggedUser = null;
+  // ── Excluir conta ────────────────────────────────────────
+  void deleteAccount() {
+    if (_loggedUser == null) return;
+    final email = _loggedUser!['email']!;
+
+    // Remove dados de todos os serviços
+    MockMedicationService.instance.deleteUser(email);
+    MockExamService.instance.deleteUser(email);
+    MockHistoryService.instance.deleteUser(email);
+    MockNotificationService.instance.deleteUser(email);
+
+    // Remove o usuário da lista
+    _users.removeWhere((u) => u['email'] == email);
+    _loggedUser = null;
+  }
+
+  // ── Logout ───────────────────────────────────────────────
+  void logout() {
+    if (_loggedUser != null) {
+      final email = _loggedUser!['email']!;
+      MockMedicationService.instance.clearUser();
+      MockExamService.instance.clearUser();
+      MockHistoryService.instance.clearUser();
+      MockNotificationService.instance.clearUser();
+    }
+    _loggedUser = null;
+  }
 }
