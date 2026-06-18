@@ -11,13 +11,12 @@ class _FaqItem {
   final String question;
   final String answer;
   final IconData icon;
-  bool isExpanded;
+  bool isExpanded = false;
 
   _FaqItem({
     required this.question,
     required this.answer,
     required this.icon,
-    this.isExpanded = false,
   });
 }
 
