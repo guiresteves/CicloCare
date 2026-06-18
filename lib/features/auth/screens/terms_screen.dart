@@ -11,7 +11,7 @@ class TermsScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // ── Header ───────────────────────────────────────────────
+            // Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Stack(
@@ -48,7 +48,7 @@ class TermsScreen extends StatelessWidget {
               ),
             ),
 
-            // ── Conteúdo ─────────────────────────────────────────────
+            // Conteúdo 
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
@@ -110,7 +110,7 @@ class TermsScreen extends StatelessWidget {
   }
 }
 
-// ── Widgets internos ──────────────────────────────────────────────────────────
+// Widgets internos
 
 class _Section extends StatelessWidget {
   final String number;

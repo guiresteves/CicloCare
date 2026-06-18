@@ -3,42 +3,118 @@
 //  Arquivo: lib/features/home/models/medication.dart
 // ════════════════════════════════════════════════════════════
 
+enum MedicationCategory { remedio, exame, consulta }
+
+enum MedicationStatus { pending, taken, overdue, skipped }
+
 class Medication {
   final String id;
   String name;
   String dosage;
-  String time;
   String frequency;
+  int timesPerDay;
+  List<String> times;
   String type;
-  bool taken;
+  MedicationCategory category;
+  String observations;
 
-  // ── Período de tratamento ────────────────────────────────
   DateTime? startDate;
   DateTime? endDate;
+
+  Map<String, MedicationStatus> statusMap;
 
   Medication({
     required this.id,
     required this.name,
     required this.dosage,
-    required this.time,
     required this.frequency,
+    required this.timesPerDay,
+    required this.times,
     required this.type,
-    this.taken = false,
+    this.category    = MedicationCategory.remedio,
+    this.observations= '',
     this.startDate,
     this.endDate,
-  });
+    Map<String, MedicationStatus>? statusMap,
+  }) : statusMap = statusMap ?? {};
 
-  // Formata período para exibição
-  String get periodLabel {
-    if (startDate == null || endDate == null) return 'Sem período definido';
-    final s = '${startDate!.day.toString().padLeft(2,'0')}/${startDate!.month.toString().padLeft(2,'0')}/${startDate!.year}';
-    final e = '${endDate!.day.toString().padLeft(2,'0')}/${endDate!.month.toString().padLeft(2,'0')}/${endDate!.year}';
-    return '$s até $e';
+  MedicationStatus statusFor(DateTime day, String time) {
+    final key = _key(day, time);
+    if (statusMap.containsKey(key)) return statusMap[key]!;
+
+    final now = DateTime.now();
+    final parts = time.split(':');
+    final doseTime = DateTime(day.year, day.month, day.day,
+        int.parse(parts[0]), int.parse(parts[1]));
+
+    if (now.isAfter(doseTime.add(const Duration(minutes: 30)))) {
+      return MedicationStatus.overdue;
+    }
+    return MedicationStatus.pending;
   }
 
-  // Quantos dias de tratamento restam
+  void setStatus(DateTime day, String time, MedicationStatus status) {
+    statusMap[_key(day, time)] = status;
+  }
+
+  String _key(DateTime day, String time) =>
+      '${day.year}-${day.month.toString().padLeft(2,'0')}-${day.day.toString().padLeft(2,'0')}_$time';
+
+  bool isActiveOn(DateTime day) {
+    final d = DateTime(day.year, day.month, day.day);
+    if (startDate == null || endDate == null) return true;
+    final s = DateTime(startDate!.year, startDate!.month, startDate!.day);
+    final e = DateTime(endDate!.year, endDate!.month, endDate!.day);
+    return !d.isBefore(s) && !d.isAfter(e);
+  }
+
+  String get periodLabel {
+    if (startDate == null || endDate == null) return 'Sem período definido';
+    return '${_fmt(startDate!)} até ${_fmt(endDate!)}';
+  }
+
+  String _fmt(DateTime d) =>
+      '${d.day.toString().padLeft(2,'0')}/${d.month.toString().padLeft(2,'0')}/${d.year}';
+
   int get daysRemaining {
     if (endDate == null) return -1;
     return endDate!.difference(DateTime.now()).inDays;
+  }
+
+  /// Período de um horário — Manhã / Tarde / Noite
+  static String periodOf(String time) {
+    final hour = int.tryParse(time.split(':')[0]) ?? 0;
+    if (hour >= 5  && hour < 12) return 'Manhã';
+    if (hour >= 12 && hour < 18) return 'Tarde';
+    return 'Noite';
+  }
+
+  static List<String> generateTimes(int timesPerDay) {
+    switch (timesPerDay) {
+      case 1:  return ['08:00'];
+      case 2:  return ['08:00', '20:00'];
+      case 3:  return ['08:00', '14:00', '20:00'];
+      case 4:  return ['08:00', '12:00', '16:00', '20:00'];
+      case 6:  return ['06:00', '10:00', '14:00', '18:00', '22:00', '02:00'];
+      default: return ['08:00'];
+    }
+  }
+
+  /// Texto do badge de tipo de item (Medicamento / Exame / Consulta)
+  String get categoryLabel {
+    switch (category) {
+      case MedicationCategory.remedio:  return 'Medicamento';
+      case MedicationCategory.exame:    return 'Exame';
+      case MedicationCategory.consulta: return 'Consulta';
+    }
+  }
+
+  /// Singular/plural genérico para contagem na Home
+  /// Evita usar "dose" para itens que não são medicamentos
+  static String itemCountLabel(int count, {bool mixed = false}) {
+    if (mixed) {
+      return count == 1 ? '1 item programado' : '$count itens programados';
+    }
+    return count == 1 ? '1 atividade' : '$count atividades';
   }
 }
