@@ -36,10 +36,8 @@ class MockMedicationService {
 
   // ── Acesso interno ───────────────────────────────────────
 
-  final List<Medication> _guestList = [];
-
   List<Medication> _list() {
-    if (_currentUser == null) return _guestList;
+    if (_currentUser == null) return [];
     return _data[_currentUser!] ?? [];
   }
 
@@ -73,16 +71,8 @@ class MockMedicationService {
   // ── Mutações ─────────────────────────────────────────────
 
   void add(Medication m) {
-    print('===== ADD =====');
-    print('currentUser: $_currentUser');
-
-    final list = _list();
-
-    print('antes: ${list.length}');
-
-    list.add(m);
-
-    print('depois: ${list.length}');
+    _list().add(m);
+    MockNotificationService.instance.addMedicationAdded(m.name);
   }
 
   void update(Medication updated) {

@@ -7,23 +7,37 @@ import '../../auth/mock/mock_auth_service.dart';
 import '../../notifications/mock/mock_notification_service.dart';
 import '../../notifications/screens/notifications_screen.dart';
 import '../../main/main_screen.dart';
+import '../../exams/models/exam.dart';
+import '../../exams/mock/mock_exam_service.dart';
+import '../../exams/screens/exam_dose_card.dart';
+import '../../exams/screens/exam_action_modal.dart';
 import 'medication_dose_card.dart';
 import 'dose_action_modal.dart';
 import 'dose_entry.dart';
 
-// ════════════════════════════════════════════════════════════
-//  HOME SCREEN — CicloCare
-//  Arquivo: lib/features/home/screens/home_screen.dart
-// ════════════════════════════════════════════════════════════
+
+// GlobalKey público — MainScreen usa para chamar reload()
+final homeScreenKey = GlobalKey<HomeScreenState>();
+
+class _Activity {
+  final DoseEntry? dose;
+  final Exam? exam;
+
+  _Activity.medication(this.dose) : exam = null;
+  _Activity.exam(this.exam) : dose = null;
+
+  bool get isExam => exam != null;
+  String get time => isExam ? exam!.time : dose!.time;
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> {
   static const List<String> _monthNames = [
     '', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
     'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
@@ -35,13 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late String _userName;
   late List<DateTime> _calendarDays;
   int _selectedDayIndex = 0;
-  late List<DoseEntry> _doses = [];
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _loadDoses();
-  }
+  late List<_Activity> _activities;
 
   @override
   void initState() {
@@ -54,55 +62,59 @@ class _HomeScreenState extends State<HomeScreen> {
 
   DateTime get _selectedDay => _calendarDays[_selectedDayIndex];
 
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  /// Chamado pelo MainScreen sempre que a aba Home é selecionada
+  void reload() {
+    if (mounted) setState(_loadDoses);
+  }
+
   void _loadDoses() {
-    print('LOAD DOSES CHAMADO');
-
-    final meds =
-        MockMedicationService.instance.getActiveOn(_selectedDay);
-
-    print('MEDICAMENTOS ENCONTRADOS: ${meds.length}');
-
-    for (final med in meds) {
-      print(
-        'MED: ${med.name} | INICIO: ${med.startDate} | FIM: ${med.endDate}'
-      );
-    }
-
-    _doses = [];
-
+    final meds = MockMedicationService.instance.getActiveOn(_selectedDay);
+    final doseList = <DoseEntry>[];
     for (final med in meds) {
       for (final time in med.times) {
-        _doses.add(DoseEntry(med: med, time: time));
+        doseList.add(DoseEntry(med: med, time: time));
       }
     }
 
-    _doses.sort((a, b) => a.time.compareTo(b.time));
+    // Usa getAll() (não getScheduled()) para que exames já concluídos
+    // ou cancelados continuem aparecendo no dia e contando no progresso.
+    final examList = MockExamService.instance
+        .getAll()
+        .where((e) => _isSameDay(e.scheduledDate, _selectedDay))
+        .toList();
+
+    _activities = [
+      ...doseList.map((d) => _Activity.medication(d)),
+      ...examList.map((e) => _Activity.exam(e)),
+    ]..sort((a, b) => a.time.compareTo(b.time));
   }
 
-  int get _totalDoses => _doses.length;
-  int get _doneDoses => _doses.where((d) {
-        final s = d.med.statusFor(_selectedDay, d.time);
-        return s == MedicationStatus.taken ||
-            s == MedicationStatus.skipped;
+  int get _totalDoses => _activities.length;
+
+  int get _doneDoses => _activities.where((a) {
+        if (a.isExam) {
+          final s = a.exam!.status;
+          return s == ExamStatus.completed || s == ExamStatus.cancelled;
+        }
+        final s = a.dose!.med.statusFor(_selectedDay, a.dose!.time);
+        return s == MedicationStatus.taken || s == MedicationStatus.skipped;
       }).length;
-  double get _progress =>
-      _totalDoses == 0 ? 0 : _doneDoses / _totalDoses;
 
-  List<DoseEntry> _dosesForPeriod(String period) =>
-      _doses.where((d) => Medication.periodOf(d.time) == period).toList();
+  double get _progress => _totalDoses == 0 ? 0 : _doneDoses / _totalDoses;
 
-  String _periodSubtitle(List<DoseEntry> doses) {
-    final hasOnlyMeds =
-        doses.every((d) => d.med.category == MedicationCategory.remedio);
-    final count = doses.length;
+  List<_Activity> _activitiesForPeriod(String period) =>
+      _activities.where((a) => Medication.periodOf(a.time) == period).toList();
+
+  String _periodSubtitle(List<_Activity> items) {
+    final hasOnlyMeds = items.every((a) => !a.isExam);
+    final count = items.length;
     if (hasOnlyMeds) {
-      return count == 1
-          ? '1 dose programada'
-          : '$count doses programadas';
+      return count == 1 ? '1 dose programada' : '$count doses programadas';
     }
-    return count == 1
-        ? '1 item programado'
-        : '$count itens programados';
+    return count == 1 ? '1 item programado' : '$count itens programados';
   }
 
   @override
@@ -120,21 +132,15 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _buildProgressSection(),
                 const SizedBox(height: 24),
-                if (_doses.isEmpty)
+                if (_activities.isEmpty)
                   _buildEmptyState()
                 else ...[
-                  _buildPeriodSection('Manhã',
-                      Icons.wb_sunny_outlined,
-                      AppColors.morning,
-                      AppColors.morningLight),
-                  _buildPeriodSection('Tarde',
-                      Icons.wb_cloudy_outlined,
-                      AppColors.afternoon,
-                      AppColors.afternoonLight),
-                  _buildPeriodSection('Noite',
-                      Icons.nights_stay_outlined,
-                      AppColors.night,
-                      AppColors.nightLight),
+                  _buildPeriodSection('Manhã', Icons.wb_sunny_outlined,
+                      AppColors.morning, AppColors.morningLight),
+                  _buildPeriodSection('Tarde', Icons.wb_cloudy_outlined,
+                      AppColors.afternoon, AppColors.afternoonLight),
+                  _buildPeriodSection('Noite', Icons.nights_stay_outlined,
+                      AppColors.night, AppColors.nightLight),
                 ],
               ],
             ),
@@ -144,12 +150,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ════════════════════════════════════════════════════════
-  //  HEADER
-  // ════════════════════════════════════════════════════════
   Widget _buildHeader() {
     final unread = MockNotificationService.instance.unreadCount;
-
     return Container(
       decoration: const BoxDecoration(
         gradient: AppColors.headerGradient,
@@ -188,8 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-
-              // ── Botão de Notificações ──────────────────
+              // Notificações
               GestureDetector(
                 onTap: () => Navigator.push(
                   context,
@@ -204,9 +205,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Container(
                         width: 18, height: 18,
                         decoration: const BoxDecoration(
-                          color: AppColors.warning,
-                          shape: BoxShape.circle,
-                        ),
+                            color: AppColors.warning,
+                            shape: BoxShape.circle),
                         child: Center(
                           child: Text(
                             unread > 9 ? '9+' : '$unread',
@@ -221,21 +221,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 ]),
               ),
               const SizedBox(width: 8),
-
-              // ── Botão de Configurações → Perfil ────────
+              // Configurações → Perfil
               GestureDetector(
-                onTap: () {
-                  // Navega para a aba de Perfil (índice 4) no MainScreen
-                  final mainState = context.findAncestorStateOfType<MainScreenState>();
-                  mainState?.navigateTo(4);
-                },
+                onTap: () => context
+                    .findAncestorStateOfType<MainScreenState>()
+                    ?.navigateTo(4),
                 child: _headerBtn(Icons.settings_outlined),
               ),
             ]),
-
             const SizedBox(height: 22),
-
-            // Calendário
             SizedBox(
               height: 86,
               child: ListView.separated(
@@ -246,9 +240,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   final selected = i == _selectedDayIndex;
                   final date = _calendarDays[i];
                   final isToday = i == 0;
-                  final meds =
-                      MockMedicationService.instance.getActiveOn(date);
-                  final hasDoses = meds.isNotEmpty;
+                  final hasDoses = MockMedicationService.instance
+                      .getActiveOn(date)
+                      .isNotEmpty;
 
                   return GestureDetector(
                     onTap: () => setState(() {
@@ -278,8 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: TextStyle(
                                     color: selected
                                         ? AppColors.white
-                                        : AppColors.white
-                                            .withOpacity(0.7),
+                                        : AppColors.white.withOpacity(0.7),
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600)),
                             const SizedBox(height: 2),
@@ -291,14 +284,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ? FontWeight.w900
                                         : FontWeight.w600)),
                             Text(
-                                isToday
-                                    ? 'Hoje'
-                                    : _weekNames[date.weekday],
+                                isToday ? 'Hoje' : _weekNames[date.weekday],
                                 style: TextStyle(
                                     color: selected
                                         ? AppColors.white
-                                        : AppColors.white
-                                            .withOpacity(0.7),
+                                        : AppColors.white.withOpacity(0.7),
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600)),
                           ],
@@ -333,9 +323,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Icon(icon, color: AppColors.white, size: 24),
       );
 
-  // ════════════════════════════════════════════════════════
-  //  PROGRESSO
-  // ════════════════════════════════════════════════════════
   Widget _buildProgressSection() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -348,8 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Atividades do Dia',
-                style: AppTextStyles.headlineSmall),
+            Text('Atividades do Dia', style: AppTextStyles.headlineSmall),
             Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -369,8 +355,8 @@ class _HomeScreenState extends State<HomeScreen> {
             value: _progress,
             minHeight: 12,
             backgroundColor: AppColors.inputBg,
-            valueColor: const AlwaysStoppedAnimation<Color>(
-                AppColors.primary),
+            valueColor:
+                const AlwaysStoppedAnimation<Color>(AppColors.primary),
           ),
         ),
         const SizedBox(height: 8),
@@ -383,13 +369,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ════════════════════════════════════════════════════════
-  //  SEÇÃO POR PERÍODO
-  // ════════════════════════════════════════════════════════
   Widget _buildPeriodSection(
       String period, IconData icon, Color color, Color bgColor) {
-    final doses = _dosesForPeriod(period);
-    if (doses.isEmpty) return const SizedBox.shrink();
+    final items = _activitiesForPeriod(period);
+    if (items.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -398,36 +381,36 @@ class _HomeScreenState extends State<HomeScreen> {
           padding:
               const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(14)),
+              color: bgColor, borderRadius: BorderRadius.circular(14)),
           child: Row(children: [
             Icon(icon, color: color, size: 22),
             const SizedBox(width: 8),
             Text(period,
-                style:
-                    AppTextStyles.sectionTitle.copyWith(color: color)),
+                style: AppTextStyles.sectionTitle.copyWith(color: color)),
             const Spacer(),
-            Text(_periodSubtitle(doses),
+            Text(_periodSubtitle(items),
                 style: AppTextStyles.labelSmall.copyWith(color: color)),
           ]),
         ),
         const SizedBox(height: 10),
-        ...doses.map((d) => Padding(
+        ...items.map((a) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: MedicationDoseCard(
-                dose: d,
-                selectedDay: _selectedDay,
-                onTap: () => _showDoseAction(d),
-              ),
+              child: a.isExam
+                  ? ExamDoseCard(
+                      exam: a.exam!,
+                      onTap: () => _showExamAction(a.exam!),
+                    )
+                  : MedicationDoseCard(
+                      dose: a.dose!,
+                      selectedDay: _selectedDay,
+                      onTap: () => _showDoseAction(a.dose!),
+                    ),
             )),
         const SizedBox(height: 14),
       ],
     );
   }
 
-  // ════════════════════════════════════════════════════════
-  //  ESTADO VAZIO
-  // ════════════════════════════════════════════════════════
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
@@ -453,9 +436,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ════════════════════════════════════════════════════════
-  //  MODAL DE AÇÃO
-  // ════════════════════════════════════════════════════════
   void _showDoseAction(DoseEntry d) {
     showModalBottomSheet(
       context: context,
@@ -464,7 +444,19 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (_) => DoseActionModal(
         dose: d,
         selectedDay: _selectedDay,
-        onAction: (status) => setState(() {}),
+        onAction: (_) => setState(_loadDoses),
+      ),
+    );
+  }
+
+  void _showExamAction(Exam exam) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => ExamActionModal(
+        exam: exam,
+        onAction: () => setState(_loadDoses),
       ),
     );
   }

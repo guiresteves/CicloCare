@@ -9,6 +9,8 @@ import 'features/auth/screens/forgot_password_screen.dart';
 import 'features/auth/screens/terms_screen.dart';
 import 'features/auth/screens/privacy_screen.dart';
 import 'features/main/main_screen.dart';
+import 'features/notifications/screens/notifications_screen.dart';
+import 'features/help/screnns/help_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,13 +33,15 @@ class CicloCareApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       initialRoute: AppRoutes.onboarding,
       routes: {
-        AppRoutes.onboarding:     (_) => const OnboardingScreen(),
-        AppRoutes.login:          (_) => const LoginScreen(),
-        AppRoutes.register:       (_) => const RegisterScreen(),
-        AppRoutes.forgotPassword: (_) => const ForgotPasswordScreen(),
-        AppRoutes.terms:          (_) => const TermsScreen(),
-        AppRoutes.privacy:        (_) => const PrivacyScreen(),
-        AppRoutes.main:           (_) => const MainScreen(),
+        AppRoutes.onboarding:    (_) => const OnboardingScreen(),
+        AppRoutes.login:         (_) => const LoginScreen(),
+        AppRoutes.register:      (_) => const RegisterScreen(),
+        AppRoutes.forgotPassword:(_) => const ForgotPasswordScreen(),
+        AppRoutes.terms:         (_) => const TermsScreen(),
+        AppRoutes.privacy:       (_) => const PrivacyScreen(),
+        AppRoutes.main:          (_) => const MainScreen(),
+        AppRoutes.notifications: (_) => const NotificationsScreen(),
+        AppRoutes.help:          (_) => const HelpScreen(),
       },
     );
   }

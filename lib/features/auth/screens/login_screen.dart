@@ -6,8 +6,11 @@ import '../mock/mock_auth_service.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/ciclocare_logo.dart';
-import '../../home/mock/mock_medication_service.dart';
 
+// ════════════════════════════════════════════════════════════
+//  LOGIN SCREEN — CicloCare
+//  Arquivo: lib/features/auth/screens/login_screen.dart
+// ════════════════════════════════════════════════════════════
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,15 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (error != null) {
       setState(() => _errorMsg = error);
     } else {
-      MockMedicationService.instance.setUser(
-        MockAuthService.instance.currentEmail!,
-      );
-
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.main,
-        (_) => false,
-      );
+      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.main, (_) => false);
     }
   }
 

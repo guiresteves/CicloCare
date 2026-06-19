@@ -1,10 +1,3 @@
-// ════════════════════════════════════════════════════════════
-//  MODELO — Exam
-//  Arquivo: lib/features/exams/models/exam.dart
-//
-//  Tipos simplificados: exam | consultation
-// ════════════════════════════════════════════════════════════
-
 enum ExamStatus { scheduled, completed, cancelled }
 
 // Simplificado conforme solicitado
